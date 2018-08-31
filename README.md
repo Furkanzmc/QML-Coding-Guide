@@ -8,7 +8,7 @@ This section provides details about how to format the order of properties, signa
 
 - Property declarations
 - Signal declarations
-- id (Optionally `id` property can be put right after the object decleration to make it easier to locate an object.)
+- id (Optionally `id` property can be put right after the object declaration to make it easier to locate an object.)
 - Object properties
 - States
 - Transitions
@@ -103,7 +103,7 @@ This is because it mentally makes for a better picture because `Component.onComp
 
 ------
 
-If there are multiple signal hanlers in an `Item`, then the ones with least amount of lines are palced at the top. As the implementation lines increases, the handler also moves down. The only exception to this is `Component.onCompleted` signal, it is always placed at the bottom.
+If there are multiple signal handlers in an `Item`, then the ones with least amount of lines are placed at the top. As the implementation lines increases, the handler also moves down. The only exception to this is `Component.onCompleted` signal, it is always placed at the bottom.
 
 ```qml
 // Wrong
@@ -137,7 +137,7 @@ Item {
 
 ### Property Ordering
 
-The first property assignment must always be the `id` of the component. If you want to declare custom properties for a component, the declerations are always above the first property assignment.
+The first property assignment must always be the `id` of the component. If you want to declare custom properties for a component, the declarations are always above the first property assignment.
 
 ```qml
 // Wrong
@@ -200,9 +200,9 @@ It is usually harder to see the property assignments If they are mixed with sign
 
 ### Function Ordering
 
-Although there are no private and public functions in QML, you can provide a similar mechanism by wrapping the properties and and functions that are only supposed to be used internally in `QtObject `.
+Although there are no private and public functions in QML, you can provide a similar mechanism by wrapping the properties and functions that are only supposed to be used internally in `QtObject `.
 
-Public function implementations are always put at the very buttom of the file.
+Public function implementations are always put at the very bottom of the file.
 
 ```qml
 // Wrong
@@ -229,7 +229,7 @@ Item {
 
 ### Animations
 
-When using any subclass of `Animation`, especially nested ones like `SequentialAnimation`, try to keep the `Animation` objects to one line for readibilty. You will benefit from keeping the animations as simple as possible since they are executed every frame, and also find it easier to see the execution of the animation in your head.
+When using any subclass of `Animation`, especially nested ones like `SequentialAnimation`, try to keep the `Animation` objects to one line for readability. You will benefit from keeping the animations as simple as possible since they are executed every frame, and also find it easier to see the execution of the animation in your head.
 
 ```qml
 // Bad
@@ -260,7 +260,7 @@ SequentialAnimation {
 
 If a component does not need to be accessed for a functionality, avoid setting the `id` property. This way you don't clutter the namespace with unused `id`s and you'll be less likely to run into duplicate `id` problem.
 
-It is a good idea to use max 3-4 character abbreviation for the `id`s so that whe you are looking for a certain component, say a `TextBox`, it will be easier to list the IDs of all the text boxes by just typing `tb`.
+It is a good idea to use max 3-4 character abbreviation for the `id`s so that when you are looking for a certain component, say a `TextBox`, it will be easier to list the IDs of all the text boxes by just typing `tb`.
 
 The schema would be `[COMPONENT_NAME][COMPONENT_DESCRIPTION]`, e.g `tbEmail`, `btnLogIn`
 
@@ -344,7 +344,7 @@ If you are also importing a JavaScript file, make sure to not include the same m
 
 If you are not making use of the imported module in the QML file, consider moving the import statement to the JavaScript file. But note that once you import something in the JavaScript file, the imports will no longer be shared. For the complete rules see [here](https://doc.qt.io/qt-5/qtqml-javascript-imports.html#imports-within-javascript-resources).
 
-Alternatively, you can use `Qt.include()` which copies the contens of the included file and you will not have to worry about the import sharing rules.
+Alternatively, you can use `Qt.include()` which copies the contents of the included file and you will not have to worry about the import sharing rules.
 
 #### Import Order
 
@@ -414,13 +414,13 @@ Rectangle {
 }
 ```
 
-Now whenever the user presses the mouse button, only one block will be excuted for two of those expected outcomes.
+Now whenever the user presses the mouse button, only one block will be executed for two of those expected outcomes.
 
-Alternatively, you can use `Connections` to connect to a particular signal for an object and update the proeprties in the signal handler. This canse is particularly useful when you are using `Loader`s.
+Alternatively, you can use `Connections` to connect to a particular signal for an object and update the properties in the signal handler. This case is particularly useful when you are using `Loader`s.
 
 ### Making `Connections`
 
-`Connections` object is used to handle signals from artbitrary `QObject` derived classes in QML. One thing to keep in mind when using connections is the default value of `target` property of the `Connections` is its parent if not explicitly set to something else. If you are setting the target after dynamically creating a QML object, you might want to set the `target` to `null` otherwise you might get signals that are not meant to be handled.
+`Connections` object is used to handle signals from arbitrary `QObject` derived classes in QML. One thing to keep in mind when using connections is the default value of `target` property of the `Connections` is its parent if not explicitly set to something else. If you are setting the target after dynamically creating a QML object, you might want to set the `target` to `null` otherwise you might get signals that are not meant to be handled.
 
 ```qml
 // Bad
@@ -433,7 +433,7 @@ Item {
     Connections {
 	    // Notice that target is not set so it's implicitly set to root.
         onWidthChanged: {
-            // Do something. But since Item also has a width property we may handle the change for root untill the target is set explicitly.
+            // Do something. But since Item also has a width property we may handle the change for root until the target is set explicitly.
         }
     }
 }
@@ -456,7 +456,7 @@ Item {
 
 ### Use `Binding` Object 
 
-`Binding`'s `when` property can be used to enable or disable a binding expression bepending on a condition. If the binding that you are using is complex and does not need to be executed everytime a property changes, this is a good idea to reduce the binding execution count.
+`Binding`'s `when` property can be used to enable or disable a binding expression depending on a condition. If the binding that you are using is complex and does not need to be executed everytime a property changes, this is a good idea to reduce the binding execution count.
 
 Using the same example above, we can rewrite it as follows using a `Binding` object.
 
@@ -476,11 +476,11 @@ Rectangle {
 }
 ```
 
-Again, this is a really simple example to get the point out. In a real life situation, you would not get more benefit from using `Binding` object in this case unless the binding expression is expensive (e.g It changes the an item's `anchor` which causes a whole chain reaction and causes other items to be repositioned.).
+Again, this is a really simple example to get the point out. In a real life situation, you would not get more benefit from using `Binding` object in this case unless the binding expression is expensive (e.g It changes the item's `anchor` which causes a whole chain reaction and causes other items to be repositioned.).
 
 ### KISS It
 
-You are problably already familiar with the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle). QML supports optimization of binding expressions. Optimized bindings do not require a JavaScript environment hence it runs faster. The basic requirement for optimization of bindings is that the type  information of every symbol accessed must be known at compile time.
+You are probably already familiar with the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle). QML supports optimization of binding expressions. Optimized bindings do not require a JavaScript environment hence it runs faster. The basic requirement for optimization of bindings is that the type  information of every symbol accessed must be known at compile time.
 
 So, avoid accessing `var` properties. You can see the full list of prerequisites of optimized bindings [here](https://doc.qt.io/qt-5/qtquick-performance.html#bindings).
 
@@ -507,7 +507,7 @@ You can also use `Qt.callLater` to reduce the redundant calls to a function.
 
 If you have a loop or process where you update the value of the property, you may want to use a temporary local variable where you accumulate those changes and only report the last value to the property. This way you can avoid triggering re-evaluation of binding expressions during the intermediate stages of accumulation.
 
-Here's a bad example straigth from Qt documentation:
+Here's a bad example straight from Qt documentation:
 
 ```qml
 import QtQuick 2.3
