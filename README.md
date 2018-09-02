@@ -1,5 +1,24 @@
 # QML Coding Guide
 
+## Table of Contents
+
+- [Item 1: Code Style](#item-1-code-style)
+    + [Signal Handler Ordering](#signal-handler-ordering)
+    + [Property Ordering](#property-ordering)
+    + [Function Ordering](#function-ordering)
+    + [Animations](#animations)
+    + [Giving Components `id`s](#giving-components-ids)
+    + [Property Assignments](#property-assignments)
+    + [Import Statements](#import-statements)
+        + [Import Order](#import-order)
+- [Item 2: Bindings](#item-2-bindings)
+    + [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
+    + [Making `Connections`](#making-connections)
+    + [Use `Binding` Object](#use-binding-object)
+    + [KISS It](#kiss-it)
+    + [Be Lazy](#be-lazy)
+    + [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
+
 ## Item 1: Code Style
 
 This section provides details about how to format the order of properties, signals, and functions to make things easy on the eyes and quickly switch to related code block.
@@ -336,7 +355,7 @@ Component {
 
 This ensures that whenever you make a change to `specialComponent` it will take effect in all of the `Loader`s. In the bad example, you would have to duplicate the same change.
 
-## Import Statements
+### Import Statements
 
 Imports are take time in QML. And If you are developing for a device with low system specifications, then you will want to optimize as much as possible. In that case, try to minimize the number of imports you use in your QML file.
 
