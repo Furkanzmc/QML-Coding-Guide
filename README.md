@@ -103,7 +103,7 @@ When handling the signals attached to an `Item`, make sure to always leave `Comp
 ```qml
 // Wrong
 Item {
-	Component.onCompleted: {
+    Component.onCompleted: {
 	}
     onSomeEvent: {
     }
@@ -114,7 +114,7 @@ Item {
     onSomeEvent: {
     }
     Component.onCompleted: {
-	}
+    }
 }
 ```
 
@@ -127,7 +127,7 @@ If there are multiple signal handlers in an `Item`, then the ones with least amo
 ```qml
 // Wrong
 Item {
-	onOtherEvent: {
+    onOtherEvent: {
         // Line 1
         // Line 2
         // Line 3
@@ -145,12 +145,12 @@ Item {
         // Line 1
         // Line 2
     }
-	onOtherEvent: {
+    onOtherEvent: {
         // Line 1
         // Line 2
         // Line 3
         // Line 4
-	}
+    }
 }
 ```
 
@@ -170,7 +170,7 @@ Item {
 Item {
     id: myItem
 
-	property int otherProperty: -1
+    property int otherProperty: -1
 
     someProperty: false
 }
@@ -194,9 +194,9 @@ If there are also property assignments along with signal handlers, make sure to 
 ```qml
 // Wrong
 Item {
-	onOtherEvent: {
-	}
-	someProperty: true
+    onOtherEvent: {
+    }
+    someProperty: true
     onSomeEvent: {
     }
     x: 23
@@ -209,7 +209,7 @@ Item {
     y: 32
     someProperty: true
     onOtherEvent: {
-	}
+    }
     onSomeEvent: {
     }
 }
@@ -227,22 +227,22 @@ Public function implementations are always put at the very bottom of the file.
 // Wrong
 Item {
 
-	function someFunction() {
-	}
-
-	someProperty: true
+    function someFunction() {
+    }
+    
+    someProperty: true
 }
 
 // Correct
 Item {
     someProperty: true
     onOtherEvent: {
-	}
+    }
     onSomeEvent: {
     }
 
     function someFunction() {
-	}
+    }
 }
 ```
 
@@ -396,8 +396,8 @@ Rectangle {
     }
 
     MouseArea {
-	    id: mouseArea
-    	anchors.fill: parent
+        id: mouseArea
+        anchors.fill: parent
     }
 }
 ```
@@ -411,12 +411,12 @@ Rectangle {
     id: root
 
     Text {
-	    id: label
+        id: label
         anchors.centerIn: parent
     }
 
     MouseArea {
-	    id: mouseArea
+        id: mouseArea
     	anchors.fill: parent
     	onPressedChanged: {
             if (pressed) {
@@ -449,7 +449,7 @@ Item {
     }
 
     Connections {
-	    // Notice that target is not set so it's implicitly set to root.
+        // Notice that target is not set so it's implicitly set to root.
         onWidthChanged: {
             // Do something. But since Item also has a width property we may handle the change for root until the target is set explicitly.
         }
@@ -488,7 +488,7 @@ Rectangle {
     }
 
     MouseArea {
-	    id: mouseArea
+        id: mouseArea
     	anchors.fill: parent
     }
 }
@@ -560,7 +560,7 @@ import QtQuick 2.3
 Item {
     id: root
 
-	property int accumulatedValue: 0
+    property int accumulatedValue: 0
 
     width: 200
     height: 200
