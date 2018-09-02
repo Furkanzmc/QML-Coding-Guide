@@ -6,9 +6,9 @@ This section provides details about how to format the order of properties, signa
 
 [QML object attributes](https://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html) are always structured in the following order:
 
+- id
 - Property declarations
 - Signal declarations
-- id (Optionally `id` property can be put right after the object declaration to make it easier to locate an object.)
 - Object properties
 - States
 - Transitions
@@ -22,13 +22,13 @@ This section provides details about how to format the order of properties, signa
 
 ```qml
 Rectangle {
+    id: photo
 
     property bool thumbnail: false // Property declarations
     property alias image: photoImage.source
 
     signal clicked // Signal declarations
 
-    id: photo
     x: 20
     y: 20
     height: 150
@@ -50,7 +50,7 @@ Rectangle {
         ColorAnimation { target: border; duration: 200 }
     }
     onSomeEvent: {
-        
+
     }
 
     Rectangle { // Child objects - Visual Items
@@ -59,16 +59,16 @@ Rectangle {
 
         Image { id: photoImage; anchors.centerIn: parent }
     }
-    
+
     Timer { } // Child objects - Qt provided non-visual items
-    
+
     MyCppObject { } // Child object - Custom provided non-visual items
 
     QtObject {
+        id: privates
 
         property var privateProperty: null
 
-        id: privates
     }
 
     function doSomething(x) { // JavaScript functions
@@ -149,10 +149,10 @@ Item {
 
 // Correct
 Item {
+    id: myItem
 
 	property int otherProperty: -1
-	
-    id: myItem
+
     someProperty: false
 }
 ```
@@ -207,7 +207,7 @@ Public function implementations are always put at the very bottom of the file.
 ```qml
 // Wrong
 Item {
-	
+
 	function someFunction() {
 	}
 
@@ -221,8 +221,8 @@ Item {
 	}
     onSomeEvent: {
     }
-    
-    function someFunction() {   
+
+    function someFunction() {
 	}
 }
 ```
@@ -239,7 +239,7 @@ SequentialAnimation {
     	property: "visible"
     	value: true
     }
-    
+
     NumberAnimation {
     	target: root
         property: "opacity"
@@ -326,7 +326,7 @@ Loader {
 
 Component {
     id: specialComponent
-    
+
     SomeSpecialComponent {
         text: "Some Component"
     }
@@ -356,7 +356,6 @@ When importing other modules, use the following order;
 - QML folder imports
 
 
-
 ## Item 2: Bindings
 
 Bindings are a powerful tool when used responsibly. Bindings are evaluated whenever a property it depends on changes and this may result in poor performance or unexpected behaviours. Even when the binding is simple, its consequence can be expensive. For instance, a binding can cause the position of an item to change and every other item that depends on the position of that item or is anchored to it will also update its position.
@@ -371,12 +370,12 @@ When using bindings, there are bound to be cases where a single changed signal c
 Rectangle {
     id: root
     color: mouseArea.pressed ? "red" : "yellow"
-    
+
     Text {
         anchors.centerIn: parent
         text: mouseArea.pressed ? "Red Color" : "Yellow Color"
     }
-    
+
     MouseArea {
 	    id: mouseArea
     	anchors.fill: parent
@@ -391,12 +390,12 @@ We can rewrite that as follows to reduce the number of bindings to only one.
 ```qml
 Rectangle {
     id: root
-    
+
     Text {
 	    id: label
         anchors.centerIn: parent
     }
-    
+
     MouseArea {
 	    id: mouseArea
     	anchors.fill: parent
@@ -429,7 +428,7 @@ Item {
     onSomeEvent: {
         // Set the target of the Connections.
     }
-    
+
     Connections {
 	    // Notice that target is not set so it's implicitly set to root.
         onWidthChanged: {
@@ -444,7 +443,7 @@ Item {
     onSomeEvent: {
         // Set the target of the Connections.
     }
-    
+
     Connections {
     	target: null // Good. Now we won't have the same problem.
         onWidthChanged: {
@@ -454,7 +453,7 @@ Item {
 }
 ```
 
-### Use `Binding` Object 
+### Use `Binding` Object
 
 `Binding`'s `when` property can be used to enable or disable a binding expression depending on a condition. If the binding that you are using is complex and does not need to be executed everytime a property changes, this is a good idea to reduce the binding execution count.
 
@@ -463,12 +462,12 @@ Using the same example above, we can rewrite it as follows using a `Binding` obj
 ```qml
 Rectangle {
     id: root
-    
+
     Binding on color {
         when: mouseArea.pressed
         value: mouseArea.pressed ? "red" : "yellow"
     }
-    
+
     MouseArea {
 	    id: mouseArea
     	anchors.fill: parent
@@ -513,10 +512,10 @@ Here's a bad example straight from Qt documentation:
 import QtQuick 2.3
 
 Item {
+    id: root
 
     property int accumulatedValue: 0
-    
-    id: root
+
     width: 200
     height: 200
     Component.onCompleted: {
@@ -540,10 +539,10 @@ And here is the proper way of doing it:
 import QtQuick 2.3
 
 Item {
-	
+    id: root
+
 	property int accumulatedValue: 0
 
-    id: root
     width: 200
     height: 200
     Component.onCompleted: {
@@ -552,7 +551,7 @@ Item {
         for (var i = 0; i < someData.length; ++i) {
             temp = temp + someData[i];
         }
-        
+
         accumulatedValue = temp;
     }
 
