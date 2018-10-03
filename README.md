@@ -18,6 +18,11 @@
     + [KISS It](#kiss-it)
     + [Be Lazy](#be-lazy)
     + [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
+- [Item 3: C++ Integration](#item-3-c-integration)
+    + [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
+    + [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
+    + [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
+    + [Watch Out for Orphan Objects](#watch-out-for-orphan-objects)
 
 ## Item 1: Code Style
 
@@ -229,7 +234,7 @@ Item {
 
     function someFunction() {
     }
-    
+
     someProperty: true
 }
 
@@ -582,3 +587,78 @@ Item {
 }
 ```
 
+## Item 3: C++ Integration
+
+QML can be extended with C++ by exposing the `QObject` classes using the `Q_OBJECT` macro or custom data types using `Q_GADGET` macro.
+It always should be preferred to use C++ to add functionality to a QML application. But it is important to know which is the best way to expose your C++ classes, and it depends on your use case.
+
+### Prefer Context Properties for Primitive Data Types
+
+Context properties are registered using `rootContext()->setContextProperty("someProperty", QVariant());`.
+Context properties always takes in a `QVariant`, which means that whenever you access the property it is re-evaluated because in between each access the property may be changed as `setContextProperty()` can be used at any moment in time.
+
+If you are exposing context properties, set them before loading the `main.qml` file otherwise your UI would be blocked. Doing it before loading the window at least hides a window freeze from the user.
+
+If you really have to use context properties and you access them repeatedly in the same scope, consider assigning the context to a `var` so that it is only evaluated once.
+
+```js
+function expensiveOperation() { // Bad
+    for (var index in aList) {
+        // contextProperty is re-evaluated each time the for loop resets.
+        // For long operations, this may significantly affect the performance and block the UI.
+        contextProperty.someOperation(aList[index]);
+    }
+}
+
+function expensiveOperation() { // Less Bad
+    var context = contextProperty; // Only evaluated once.
+    for (var index in aList) {
+        context.someOperation(aList[index]);
+    }
+}
+```
+
+Since the cost of accessing context properties is expensive, calling a method from a context property is even more expensive. So, keep your context properties for only primitive types If you really have to use context properties.
+
+All of this consideration will not have a significant impact If you have an infrequent use of the context property or for a small app. But If you are concerned with performance (e.g when writing a game.), either avoid from context properties or use them for primitive types, or types that are inexpensive to convert. See [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#conversion-between-qt-and-javascript-types) for a list of data types that support conversation and their impact on performance.
+
+### Prefer Singletons Over Context Properties
+
+There are bound to be cases where you have to provide a single instance for a functionality or common data access. In this situation, resort to using a singleton as it will have a better performance and be easier to read. Singletons are also a good option to expose enums to QML.
+
+```c++
+class MySingletonClass : public QObject
+{
+public:
+    static QObject *singletonProvider(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
+    {
+        if (m_Instance == nullptr) {
+            m_Instance = new MySingletonClass(qmlEngine);
+        }
+
+        Q_UNUSED(jsEngine);
+        return m_Instance;
+    }
+};
+
+// In main.cpp
+qmlRegisterSingletonType<SingletonTest>("MyNameSpace", 1, 0, "MySingletonClass", MySingletonClass::singletonProvider);
+```
+
+### Prefer Instantiated Classes Over Singletons and Context Properties
+
+Context properties and singletons are sufficient solution If you are not concerned about milking every CPU cycle you can. They are good and standard solutions to a problem and there will be cases where they make more sense. But instantiated classes in QML outperform both of those significantly. Also, since instantiated classes have parents, you don't have to dispose them manually. But with context properties and singletons it will not be the case.
+
+So, analyze your situation and try to stick to the solution that most suits the problem at hand. Don't over use context properties or singletons or instantiated classes unwarranted performance concerns.
+
+Go [here](https://github.com/Furkanzmc/QML-Cpp-Access-Speed-Test) to see a comparison of the three exposing methods compare against each other.
+
+### Watch Out for Orphan Objects
+
+When you are exposing data to QML from C++, you are likely to pass around custom data types as well. It is important to realize the implications of ownership when you are passing data to QML. Otherwise you might end up scratching your head trying to figure out why your app crashes.
+
+If you are exposing custom data type, prefer to set the parent of that data to the C++ class that transmits it to QML. This way, when the C++ class gets destroyed the custom data type also gets destroyed and you won't have to worry about releasing memory manually.
+
+There might also be cases where you expose data from a singleton class without a parent and the data gets destroyed because QML object that receives it will take ownership and destroy it. And you will end up accessing data that doesn't exist. For data ownership rules see [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#data-ownership).
+
+To learn more about the real life implications of this read [this blog post](https://www.embeddeduse.com/2018/04/02/qml-engine-deletes-c-objects-still-in-use/).
