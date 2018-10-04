@@ -382,7 +382,7 @@ When importing other modules, use the following order;
 
 ## Item 2: Bindings
 
-Bindings are a powerful tool when used responsibly. Bindings are evaluated whenever a property it depends on changes and this may result in poor performance or unexpected behaviours. Even when the binding is simple, its consequence can be expensive. For instance, a binding can cause the position of an item to change and every other item that depends on the position of that item or is anchored to it will also update its position.
+Bindings are a powerful tool when used responsibly. Bindings are evaluated whenever a property it depends on changes and this may result in poor performance or unexpected behaviors. Even when the binding is simple, its consequence can be expensive. For instance, a binding can cause the position of an item to change and every other item that depends on the position of that item or is anchored to it will also update its position.
 
 So consider the following rules when you are using bindings.
 
@@ -479,7 +479,7 @@ Item {
 
 ### Use `Binding` Object
 
-`Binding`'s `when` property can be used to enable or disable a binding expression depending on a condition. If the binding that you are using is complex and does not need to be executed everytime a property changes, this is a good idea to reduce the binding execution count.
+`Binding`'s `when` property can be used to enable or disable a binding expression depending on a condition. If the binding that you are using is complex and does not need to be executed every time a property changes, this is a good idea to reduce the binding execution count.
 
 Using the same example above, we can rewrite it as follows using a `Binding` object.
 
@@ -618,9 +618,25 @@ function expensiveOperation() { // Less Bad
 }
 ```
 
-Since the cost of accessing context properties is expensive, calling a method from a context property is even more expensive. So, keep your context properties for only primitive types If you really have to use context properties.
+Since the cost of accessing context properties is expensive, calling a method from a context property is even more expensive. So, keep your context properties for only primitive types If you really have to use context properties. An example use case could be adding the macro equivalents for QML code. For example, If you want to have different behaviors based on the build type, you could do something like the following.
 
-All of this consideration will not have a significant impact If you have an infrequent use of the context property or for a small app. But If you are concerned with performance (e.g when writing a game.), either avoid from context properties or use them for primitive types, or types that are inexpensive to convert. See [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#conversion-between-qt-and-javascript-types) for a list of data types that support conversation and their impact on performance.
+```c++
+#ifdef QT_DEBUG
+    rootContext->setContextProperty("QT_DEBUG", QVariant(true));
+#else
+    rootContext->setContextProperty("QT_DEBUG", QVariant(false));
+#endif
+```
+
+And then have different behavior in QML.
+
+```qml
+MyItem {
+    someProperty: QT_DEBUG ? 32 : 23
+}
+```
+
+This will not have a significant impact If you have an infrequent use of the context property or for a small app. But If you are concerned with performance (e.g when writing a game.), either avoid from context properties or use them for primitive types, or types that are inexpensive to convert. See [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#conversion-between-qt-and-javascript-types) for a list of data types that support conversation and their impact on performance.
 
 ### Prefer Singletons Over Context Properties
 
