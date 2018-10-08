@@ -22,7 +22,7 @@
     + [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
     + [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
     + [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
-    + [Watch Out for Orphan Objects](#watch-out-for-orphan-objects)
+    + [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
 
 ## Item 1: Code Style
 
@@ -669,7 +669,7 @@ So, analyze your situation and try to stick to the solution that most suits the 
 
 Go [here](https://github.com/Furkanzmc/QML-Cpp-Access-Speed-Test) to see a comparison of the three exposing methods compare against each other.
 
-### Watch Out for Orphan Objects
+### Watch Out for Object Ownership Rules
 
 When you are exposing data to QML from C++, you are likely to pass around custom data types as well. It is important to realize the implications of ownership when you are passing data to QML. Otherwise you might end up scratching your head trying to figure out why your app crashes.
 
