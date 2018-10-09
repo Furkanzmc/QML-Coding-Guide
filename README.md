@@ -3,26 +3,36 @@
 ## Table of Contents
 
 - [Item 1: Code Style](#item-1-code-style)
-    + [Signal Handler Ordering](#signal-handler-ordering)
-    + [Property Ordering](#property-ordering)
-    + [Function Ordering](#function-ordering)
-    + [Animations](#animations)
-    + [Giving Components `id`s](#giving-components-ids)
-    + [Property Assignments](#property-assignments)
-    + [Import Statements](#import-statements)
-        + [Import Order](#import-order)
+
+  - [Signal Handler Ordering](#signal-handler-ordering)
+  - [Property Ordering](#property-ordering)
+  - [Function Ordering](#function-ordering)
+  - [Animations](#animations)
+  - [Giving Components `id`s](#giving-components-ids)
+  - [Property Assignments](#property-assignments)
+  - [Import Statements](#import-statements)
+    - [Import Order](#import-order)
+
 - [Item 2: Bindings](#item-2-bindings)
-    + [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
-    + [Making `Connections`](#making-connections)
-    + [Use `Binding` Object](#use-binding-object)
-    + [KISS It](#kiss-it)
-    + [Be Lazy](#be-lazy)
-    + [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
+
+  - [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
+  - [Making `Connections`](#making-connections)
+  - [Use `Binding` Object](#use-binding-object)
+  - [KISS It](#kiss-it)
+  - [Be Lazy](#be-lazy)
+  - [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
+
 - [Item 3: C++ Integration](#item-3-c-integration)
-    + [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
-    + [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
-    + [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
-    + [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
+
+  - [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
+  - [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
+  - [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
+  - [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
+
+- [Item 4: Memory Management](#item-4-memory-management)
+    
+    - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
+
 
 ## Item 1: Code Style
 
@@ -379,7 +389,6 @@ When importing other modules, use the following order;
 - Local C++ module imports
 - QML folder imports
 
-
 ## Item 2: Bindings
 
 Bindings are a powerful tool when used responsibly. Bindings are evaluated whenever a property it depends on changes and this may result in poor performance or unexpected behaviors. Even when the binding is simple, its consequence can be expensive. For instance, a binding can cause the position of an item to change and every other item that depends on the position of that item or is anchored to it will also update its position.
@@ -678,3 +687,57 @@ If you are exposing custom data type, prefer to set the parent of that data to t
 There might also be cases where you expose data from a singleton class without a parent and the data gets destroyed because QML object that receives it will take ownership and destroy it. And you will end up accessing data that doesn't exist. Ownership is **not** transferred as the result of a property access. For data ownership rules see [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#data-ownership).
 
 To learn more about the real life implications of this read [this blog post](https://www.embeddeduse.com/2018/04/02/qml-engine-deletes-c-objects-still-in-use/).
+
+# Item 4: Memory Management
+
+Most applications are not likely to have memory limitations. But in case you are working on a memory limited hardware or you just really care about memory allocations, follow these steps to reduce your memory usage.
+
+## Reduce the Number of Implicit Types
+
+If a type defines custom properties, that type becomes an implicit type to the JS engine and additional type information has to be stored.
+
+```qml
+Rectangle { } // Explicit type because it doesn't contain any custom properties
+
+Rectangle {
+    property int meaningOfLife: 42 // The deceleration of this property makes this Rectangle an implicit type.
+}
+```
+
+You should follow the advice from the [official documentation](http://doc.qt.io/qt-5/qtquick-performance.html#avoid-defining-multiple-identical-implicit-types) and split the type into its own component If it's used in more than one place. But sometimes, that might not make sense for your case. If you are using a lot of custom properties in your QML file, consider wrapping the custom properties of types in a `QtObject`. Obviously, JS engine will still need to allocate memory for those types, but you already gain the memory efficiency by avoiding the implicit types. Additionally, wrapping the properties in a `QtObject` uses less memory than scattering those properties to different types.
+
+Consider the following example:
+
+```qml
+Window {
+    Rectangle { id: r1 } // Explicit type. Memory 64b, 1 allocation.
+
+    Rectangle { id: r2; property string nameTwo: "" } // Implicit type. Memory 128b, 3 allocations.
+
+    QtObject { // Implicit type. Memory 128b, 3 allocations.
+		id: privates
+		property string name: ""
+    }
+}
+```
+
+In this example, the introduction of a custom property to added additional 64b of memory and 2 more allocations. Along with `privates`, memory usage adds up to 256b. The total memory usage is 320b.
+
+You can use the QML profiler to see the allocations and memory usage for each type. If we change that example to the following, you'll see that both memory usage and number of allocations are reduced.
+
+```qml
+Window {
+    Rectangle { id: r1 } // Explicit type. Memory 64b, 1 allocation.
+
+    Rectangle { id: r2 } // Explicit type. Memory 64b, 1 allocation.
+
+    QtObject { // Implicit type. Memory 160b, 4 allocations.
+		id: privates
+		
+        property string name: ""
+        property string nameTwo: ""
+    }
+}
+```
+
+In the second example, total memory usage is 288b. This is really a minute difference in this context, but as the number of components increase in a project with memory constrained hardware, it can start to make a difference.
