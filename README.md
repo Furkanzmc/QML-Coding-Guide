@@ -675,6 +675,6 @@ When you are exposing data to QML from C++, you are likely to pass around custom
 
 If you are exposing custom data type, prefer to set the parent of that data to the C++ class that transmits it to QML. This way, when the C++ class gets destroyed the custom data type also gets destroyed and you won't have to worry about releasing memory manually.
 
-There might also be cases where you expose data from a singleton class without a parent and the data gets destroyed because QML object that receives it will take ownership and destroy it. And you will end up accessing data that doesn't exist. For data ownership rules see [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#data-ownership).
+There might also be cases where you expose data from a singleton class without a parent and the data gets destroyed because QML object that receives it will take ownership and destroy it. And you will end up accessing data that doesn't exist. Ownership is **not** transferred as the result of a property access. For data ownership rules see [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#data-ownership).
 
 To learn more about the real life implications of this read [this blog post](https://www.embeddeduse.com/2018/04/02/qml-engine-deletes-c-objects-still-in-use/).
