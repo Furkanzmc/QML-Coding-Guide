@@ -510,6 +510,75 @@ Rectangle {
 
 Again, this is a really simple example to get the point out. In a real life situation, you would not get more benefit from using `Binding` object in this case unless the binding expression is expensive (e.g It changes the item's `anchor` which causes a whole chain reaction and causes other items to be repositioned.).
 
+`Binding` objects can also be used to provide bidirectional binding for properties without the risk of breaking the bindings. Consider the following example:
+
+```qml
+Rectangle {
+    id: rect
+    width: 50
+    height: 50
+    anchors.centerIn: parent
+    color: cd.color
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+            if (mouse.button === Qt.LeftButton) {
+                cd.visible = true;
+            }
+            else {
+                parent.color = "black"
+            }
+        }
+    }
+}
+
+ColorDialog {
+    id: cd
+    color: rect.color
+}
+```
+
+The binding to `color` properties of `ColorDialog` and `Rectangle` will be broken once those proeprties are set from outside. If you play around with the example, you'll see that `parent.color = "black"` breaks the binding.
+
+Now, see the following example and you'll find that bindings are not broken.
+
+```qml
+Rectangle {
+    id: rect
+    width: 50
+    height: 50
+    anchors.centerIn: parent
+    color: "red"
+
+    Binding on color {
+        value: cd.color
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+            if (mouse.button === Qt.LeftButton) {
+                cd.visible = true;
+            }
+            else {
+                parent.color = "black"
+            }
+        }
+    }
+}
+
+ColorDialog {
+    id: cd
+
+    Binding on color {
+        value: rect.color
+    }
+}
+```
+
 ### KISS It
 
 You are probably already familiar with the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle). QML supports optimization of binding expressions. Optimized bindings do not require a JavaScript environment hence it runs faster. The basic requirement for optimization of bindings is that the type  information of every symbol accessed must be known at compile time.
