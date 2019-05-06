@@ -25,6 +25,8 @@
     - [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
 - [Item 4: Memory Management](#item-4-memory-management)
     - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
+- [Item 5: Signal Handling](#item-5-signal-handling)
+    - [Try to Avoid Using connect Function in Models](#try-to-avoid-using-connect-function-in-models)
 
 
 ## Item 1: Code Style
@@ -795,7 +797,7 @@ Window {
 
     QtObject { // Implicit type. Memory 160b, 4 allocations.
 		id: privates
-		
+
         property string name: ""
         property string nameTwo: ""
     }
@@ -803,3 +805,222 @@ Window {
 ```
 
 In the second example, total memory usage is 288b. This is really a minute difference in this context, but as the number of components increase in a project with memory constrained hardware, it can start to make a difference.
+
+# Item 5: Signal Handling
+
+Signals are a very powerful mechanism in Qt/QML. And the fact that you can connect
+to signals from C++ makes it even better. But in some situations, If you don't
+handle them correctly you might end up scratching your head.
+
+## Try to Avoid Using connect Function in Models
+
+You can have signals in the QML side, and the C++ side. Here's an example for
+both cases.
+
+QML Example.
+
+```qml
+// MyButton.qml
+import QtQuick.Controls 2.3
+
+Button {
+    id: root
+
+    signal rightClicked()
+}
+```
+
+C++ Example:
+
+```cpp
+class MyButton
+{
+    Q_OBJECT
+
+signals:
+    void rightClicked();
+};
+```
+
+The way you connect to signals is using the syntax
+`item.somethingChanged.connect(function() {})`. When this method is used,
+you create a function that is connected to the `somethingChanged` signal.
+
+Consider the following example:
+
+```qml
+// MyItem.qml
+Item {
+    id: root
+
+    property var customObject
+
+    objectName: "my_item_is_alive"
+    onCustomObjectChanged: {
+        customObject.somethingChanged.connect(function() {
+            console.log(root.objectName)
+        })
+    }
+}
+```
+
+This is a perfectly legal code. And it would most likely work in most scenarios.
+But, if the life time of the `customObject` is not managed in `MyItem`, meaning
+if the `customObject` can keep on living when the `MyItem` instance is destroyed,
+you run into problems.
+
+The connection is created in the context of `MyItem`, and the function naturally
+has access to its enclosing context. So, as long as we have the instance of
+`MyItem`, whenever `somethingChanged` is emitted we'd get a log saying
+`my_item_is_alive`.
+
+Here's a quote directly from [Qt documentation](https://doc.qt.io/qt-5/qml-qtquick-listview.html):
+
+> Delegates are instantiated as needed and may be destroyed at any time. They
+> are parented to `ListView`'s `contentItem`, not to the view itself. State
+> should never be stored in a delegate.
+
+So you might be making use of an external object to store state. But what If
+`MyItem` is used in a `ListView`, and it went out of view and it was destroyed
+by `ListView`?
+
+Let's examine what happens with a more concrete example.
+
+```qml
+ApplicationWindow {
+    id: root
+
+    property list<QtObject> myObjects: [
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        },
+        QtObject {
+            signal somethingHappened()
+        }
+    ]
+
+    width: 640
+    height: 480
+
+    ListView {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            bottom: btn.top
+        }
+        // Low enough we can resize the window to destroy buttons.
+        cacheBuffer: 1
+        model: root.myObjects.length
+        delegate: Button {
+            id: self
+
+            readonly property string name: "Button #" + index
+
+            text: "Button " + index
+            onClicked: {
+                root.myObjects[index].somethingHappened()
+            }
+            Component.onCompleted: {
+                root.myObjects[index].somethingHappened.connect(function() {
+                    // When the button is destroyed, this will cause the following
+                    // error: TypeError: Type error
+                    console.log(self.name)
+                })
+            }
+            Component.onDestruction: {
+                console.log("Destroyed #", index)
+            }
+        }
+    }
+
+    Button {
+        id: btn
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
+        }
+        text: "Emit Last Signal"
+        onClicked: {
+            root.myObjects[root.myObjects.length - 1].somethingHappened()
+        }
+    }
+}
+```
+
+In this example, once one of the buttons are destroyed we still have the object
+instance. And then object instance still contains the connection we made in
+`Component.onCompleted`. So, when we click on `btn`, we get an error:
+`TypeError: Type error`. But once we expand the window so that the button is
+created again, we don't get that error. That is, we don't get that error for the
+newly created button. But the previous connection still exists and still causes
+error. But now that a new one is created, we end up with two connections on the
+same object.
+
+This is obviously not ideal and should be avoided. But how do you do it?
+
+The simplest and most elegant solution (That I have found) is to simply use a
+`Connections` object and handle the signal there. So, If we change the code to
+this:
+
+```qml
+delegate: Button {
+    id: self
+
+    readonly property string name: "Button #" + index
+
+    text: "Button " + index
+    onClicked: {
+        root.myObjects[index].somethingHappened()
+    }
+
+    Connections {
+        target: root.myObjects[index]
+        onSomethingHappened: {
+            console.log(self.name)
+        }
+    }
+}
+```
+
+Now, whenever the delegate is destroyed so is the connection. This method can
+be used even for multiple objects. You can simply put the `Connections` in a
+`Component` and use `createObject` to instantiate it for a specific object.
+
+```qml
+Item {
+    id: root
+    onObjectAdded: {
+        cmp.createObject(root, {"target": newObject})
+    }
+
+    Component {
+        id: cmp
+
+        Connections {
+            target: root.myObjects[index]
+            onSomethingHappened: {
+                console.log(self.name)
+            }
+        }
+    }
+}
+```
