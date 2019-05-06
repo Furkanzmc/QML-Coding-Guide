@@ -195,7 +195,7 @@ There's also a bit of predefined order for property assignments. The order goes 
 - height
 - anchors
 
-The goal here is to put the most obvious and most defining properties at the top for easy access and visibility. For example, for an `Image` you may decide to also put `sourceSize` above `anchors`.
+The goal here is to put the most obvious and defining properties at the top for easy access and visibility. For example, for an `Image` you may decide to also put `sourceSize` above `anchors`.
 
 ------
 
@@ -367,7 +367,7 @@ This ensures that whenever you make a change to `specialComponent` it will take 
 
 ### Import Statements
 
-Imports are take time in QML. And If you are developing for a device with low system specifications, then you will want to optimize as much as possible. In that case, try to minimize the number of imports you use in your QML file.
+Imports take time in QML. And If you are developing for a device with low system specifications, then you will want to optimize as much as possible. In that case, try to minimize the number of imports you use in your QML file.
 
 If you are also importing a JavaScript file, make sure to not include the same module in both the QML file and the JavaScript file. JavaScript files share the imports from the QML file so you can take advantage of that. Note that Qt Create does not provide code completion for the modules that you import in the QML file.
 
@@ -447,7 +447,7 @@ Alternatively, you can use `Connections` to connect to a particular signal for a
 
 ### Making `Connections`
 
-`Connections` object is used to handle signals from arbitrary `QObject` derived classes in QML. One thing to keep in mind when using connections is the default value of `target` property of the `Connections` is its parent if not explicitly set to something else. If you are setting the target after dynamically creating a QML object, you might want to set the `target` to `null` otherwise you might get signals that are not meant to be handled.
+A `Connections` object is used to handle signals from arbitrary `QObject` derived classes in QML. One thing to keep in mind when using connections is the default value of `target` property of the `Connections` is its parent if not explicitly set to something else. If you are setting the target after dynamically creating a QML object, you might want to set the `target` to `null` otherwise you might get signals that are not meant to be handled.
 
 ```qml
 // Bad
@@ -966,7 +966,7 @@ ApplicationWindow {
 }
 ```
 
-In this example, once one of the buttons are destroyed we still have the object
+In this example, once one of the buttons is destroyed we still have the object
 instance. And then object instance still contains the connection we made in
 `Component.onCompleted`. So, when we click on `btn`, we get an error:
 `TypeError: Type error`. But once we expand the window so that the button is
