@@ -3,34 +3,27 @@
 ## Table of Contents
 
 - [Item 1: Code Style](#item-1-code-style)
-
-  - [Signal Handler Ordering](#signal-handler-ordering)
-  - [Property Ordering](#property-ordering)
-  - [Function Ordering](#function-ordering)
-  - [Animations](#animations)
-  - [Giving Components `id`s](#giving-components-ids)
-  - [Property Assignments](#property-assignments)
-  - [Import Statements](#import-statements)
-    - [Import Order](#import-order)
-
+    - [Signal Handler Ordering](#signal-handler-ordering)
+    - [Property Ordering](#property-ordering)
+    - [Function Ordering](#function-ordering)
+    - [Animations](#animations)
+    - [Giving Components `id`s](#giving-components-ids)
+    - [Property Assignments](#property-assignments)
+    - [Import Statements](#import-statements)
+        + [Import Order](#import-order)
 - [Item 2: Bindings](#item-2-bindings)
-
-  - [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
-  - [Making `Connections`](#making-connections)
-  - [Use `Binding` Object](#use-binding-object)
-  - [KISS It](#kiss-it)
-  - [Be Lazy](#be-lazy)
-  - [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
-
+    - [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
+    - [Making `Connections`](#making-connections)
+    - [Use `Binding` Object](#use-binding-object)
+    - [KISS It](#kiss-it)
+    - [Be Lazy](#be-lazy)
+    - [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
 - [Item 3: C++ Integration](#item-3-c-integration)
-
-  - [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
-  - [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
-  - [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
-  - [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
-
+    - [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
+    - [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
+    - [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
+    - [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
 - [Item 4: Memory Management](#item-4-memory-management)
-    
     - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
 
 
