@@ -15,6 +15,7 @@
     - [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
     - [Making `Connections`](#making-connections)
     - [Use `Binding` Object](#use-binding-object)
+        + [Transient Bindings](#transient-bindings)
     - [KISS It](#kiss-it)
     - [Be Lazy](#be-lazy)
     - [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
@@ -570,6 +571,38 @@ ColorDialog {
 
     Binding on color {
         value: rect.color
+    }
+}
+```
+
+#### Transient Bindings
+
+There may be cases where you have to end up using an imperative assignment. But
+naturally this will break the binding. In that case, you can create transient
+`Binding` objects to safely set the new property without breaking the existing
+binding.
+
+```qml
+Item {
+    property var contentItem
+
+    onContentItemChanged: {
+        contentItem.width = 100 // This will break the binding.
+        // -----
+        var temp = cmpBinding.createObject(root, {
+            "target": contentItem,
+            "property": "width",
+            "value": 100
+        })
+        // Now the width property is safely updated to 100 without breaking
+        // any existing bindings.
+        temp.destroy() // Don't forget to destroy it.
+    }
+
+    Component {
+        id: cmpBinding
+
+        Binding { }
     }
 }
 ```
