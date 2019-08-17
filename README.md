@@ -26,7 +26,7 @@
     - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
 - [Item 5: Signal Handling](#item-5-signal-handling)
     - [Try to Avoid Using connect Function in Models](#try-to-avoid-using-connect-function-in-models)
-- [Item 6: Javascript](#item-4-javascript)
+- [Item 6: Javascript](#item-6-javascript)
     - [Use Arrow Functions](#use-arrow-functions)
 
 
@@ -118,7 +118,7 @@ When handling the signals attached to an `Item`, make sure to always leave
 // Wrong
 Item {
     Component.onCompleted: {
-	}
+    }
     onSomeEvent: {
     }
 }
@@ -402,7 +402,7 @@ the same change.
 ### Import Statements
 
 Imports take time in QML. And If you are developing for a device with low system
-pecifications, then you will want to optimize as much as possible. In that case,
+specifications, then you will want to optimize as much as possible. In that case,
 try to minimize the number of imports you use in your QML file.
 
 If you are also importing a JavaScript file, make sure to not include the same
@@ -432,7 +432,7 @@ When importing other modules, use the following order;
 Bindings are a powerful tool when used responsibly. Bindings are evaluated
 whenever a property it depends on changes and this may result in poor performance
 or unexpected behaviors. Even when the binding is simple, its consequence can be
-xpensive. For instance, a binding can cause the position of an item to change
+expensive. For instance, a binding can cause the position of an item to change
 and every other item that depends on the position of that item or is anchored to
 it will also update its position.
 
@@ -520,7 +520,7 @@ Item {
         // Notice that target is not set so it's implicitly set to root.
         onWidthChanged: {
             // Do something. But since Item also has a width property we may
-			// handle the change for root until the target is set explicitly.
+            // handle the change for root until the target is set explicitly.
         }
     }
 }
@@ -806,7 +806,7 @@ function expensiveOperation() { // Bad
     for (var index in aList) {
         // contextProperty is re-evaluated each time the for loop resets.
         // For long operations, this may significantly affect the performance
-		// and block the UI.
+        // and block the UI.
         contextProperty.someOperation(aList[index]);
     }
 }
@@ -926,7 +926,7 @@ engine and additional type information has to be stored.
 Rectangle { } // Explicit type because it doesn't contain any custom properties
 
 Rectangle {
-	// The deceleration of this property makes this Rectangle an implicit type.
+    // The deceleration of this property makes this Rectangle an implicit type.
     property int meaningOfLife: 42
 }
 ```
@@ -946,7 +946,7 @@ Consider the following example:
 Window {
     Rectangle { id: r1 } // Explicit type. Memory 64b, 1 allocation.
 
-	// Implicit type. Memory 128b, 3 allocations.
+    // Implicit type. Memory 128b, 3 allocations.
     Rectangle { id: r2; property string nameTwo: "" }
 
     QtObject { // Implicit type. Memory 128b, 3 allocations.
