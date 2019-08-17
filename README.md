@@ -28,6 +28,7 @@
     - [Try to Avoid Using connect Function in Models](#try-to-avoid-using-connect-function-in-models)
 - [Item 6: Javascript](#item-6-javascript)
     - [Use Arrow Functions](#use-arrow-functions)
+    - [Use the Modern Way of Declaring Variables](#use-the-modern-way-of-declaring-variables)
 
 
 # Item 1: Code Style
@@ -1238,3 +1239,41 @@ Item {
 ```
 
 The arrow function version is easier on the eyes and cleaner to write.
+For more information about arrow functions, head over to the [MDN Blog](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)
+
+## Use the Modern Way of Declaring Variables
+
+With ES6, there are 3 ways of delcaring a variable: `var`, `let`, and `const`.
+
+You should leverage `let` and `const` in your codebase and avoid using `var`.
+`let` and `const` enables a scope based naming wheras `var` only knows about one
+scope.
+
+```qml
+Item {
+    onClicked: {
+        const value = 32;
+        let valueTwo = 42;
+        {
+            // Valid assignment since we are in a different scope.
+            const value = 32;
+            let valueTwo = 42;
+        }
+    }
+}
+```
+
+Much like in C++, prefer using `const` If you don't want the variable to be assigned.
+But keep in mind that `const` variables in JavaScript are not immutable. It just
+means they can't be reassigned, but their contents can be changed.
+
+```js
+const value = 32;
+value = 42; // ERROR!
+
+const obj = {value: 32};
+obj.value = 42; // Valid.
+```
+
+See the MDN posts on [const](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const)
+and [let](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let)
