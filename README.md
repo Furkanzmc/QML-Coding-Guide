@@ -26,6 +26,8 @@
     - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
 - [Item 5: Signal Handling](#item-5-signal-handling)
     - [Try to Avoid Using connect Function in Models](#try-to-avoid-using-connect-function-in-models)
+- [Item 6: Javascript](#item-4-javascript)
+    - [Use Arrow Functions](#use-arrow-functions)
 
 
 # Item 1: Code Style
@@ -1204,3 +1206,35 @@ Item {
     }
 }
 ```
+
+# Item 6: Javascript
+
+It is the prevalent advice that you should avoid using JavaScipt as much as possible
+in your QML code and have the C++ side handle all the logic. This is a sound advice
+and should be followed, but there are cases where you can't avoid having JavaScript
+code for your UI. In those cases, follow these guidelines to ensure a good use of
+JavaScript in QML.
+
+## Use Arrow Functions
+
+Arrow functions were introduced in ES6. Its syntax is pretty close to C++ lambdas
+and they have a pretty neat feature that makes them most comfortable to use
+when you are using the `connect()` function to create a binding. If there's no
+block within the arrow function, it has an implicit return statement.
+
+Let's compare the arrow function version with the old way.
+
+```qml
+Item {
+	property int value: -1
+
+	Component.onCompelted: {
+		// Arrow function
+		root.value = Qt.binding(() => root.someOtherValue)
+		// The old way.
+		root.value = Qt.binding(function() { return root.someOtherValue })
+	}
+}
+```
+
+The arrow function version is easier on the eyes and cleaner to write.
