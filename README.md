@@ -279,13 +279,24 @@ Item {
 ### Animations
 
 When using any subclass of `Animation`, especially nested ones like
-`SequentialAnimation`, try to keep the `Animation` objects to one line for
-readability. You will benefit from keeping the animations as simple as possible
-since they are executed every frame, and also find it easier to see the execution
-of the animation in your head.
+`SequentialAnimation`, try to reduce the number of properties in one line.
+More than 2-3 assignments on the same line becomes harder to reason with after
+a while. Or maybe you can keep the one line assignments to whatever line length
+convention you have set up for your project.
+
+Since animations are harder to imageine in your mind, you will benefit from
+keeping the animations as simple as possible since they are executed every
+frame. Try give them meaningful IDs or object names to help your future self
+debug the animation should a problem arise in the future.
 
 ```qml
 // Bad
+NumberAnimation { target: root; property: "opacity"; duration: root.animationDuration; from: 0; to: 1 }
+
+// Depends on your convention. The line does not exceed 80 characters.
+PropertyAction { target: root; property: "visible"; value: true }
+
+// Good.
 SequentialAnimation {
     PropertyAction {
     	target: root
@@ -300,12 +311,6 @@ SequentialAnimation {
         from: 0
         to: 1
     }
-}
-
-// Good. This is easier to read as your eyes find it easy to detect things horizontally rather than vertically.
-SequentialAnimation {
-    PropertyAction { target: root; property: "visible"; value: true }
-    NumberAnimation { target: root; property: "opacity"; duration: root.animationDuration; from: 0; to: 1 }
 }
 ```
 
