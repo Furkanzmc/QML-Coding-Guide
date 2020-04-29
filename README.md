@@ -152,7 +152,7 @@ Item {
         // Line 2
         // Line 3
         // Line 4
-	}
+    }
     onSomeEvent: {
         // Line 1
         // Line 2
@@ -299,13 +299,13 @@ PropertyAction { target: root; property: "visible"; value: true }
 // Good.
 SequentialAnimation {
     PropertyAction {
-    	target: root
-    	property: "visible"
-    	value: true
+        target: root
+        property: "visible"
+        value: true
     }
 
     NumberAnimation {
-    	target: root
+        target: root
         property: "opacity"
         duration: root.animationDuration
         from: 0
@@ -493,7 +493,7 @@ Item {
     }
 
     Connections {
-    	target: null // Good. Now we won't have the same problem.
+        target: null // Good. Now we won't have the same problem.
         onWidthChanged: {
             // Do something. Only handles the changes for the intended target.
         }
@@ -521,7 +521,7 @@ Rectangle {
 
     MouseArea {
         id: mouseArea
-    	anchors.fill: parent
+        anchors.fill: parent
     }
 }
 ```
@@ -910,8 +910,8 @@ Window {
     Rectangle { id: r2; property string nameTwo: "" }
 
     QtObject { // Implicit type. Memory 128b, 3 allocations.
-		id: privates
-		property string name: ""
+        id: privates
+        property string name: ""
     }
 }
 ```
@@ -931,7 +931,7 @@ Window {
     Rectangle { id: r2 } // Explicit type. Memory 64b, 1 allocation.
 
     QtObject { // Implicit type. Memory 160b, 4 allocations.
-		id: privates
+        id: privates
 
         property string name: ""
         property string nameTwo: ""
@@ -1186,14 +1186,14 @@ Let's compare the arrow function version with the old way.
 
 ```qml
 Item {
-	property int value: -1
+    property int value: -1
 
-	Component.onCompelted: {
-		// Arrow function
-		root.value = Qt.binding(() => root.someOtherValue)
-		// The old way.
-		root.value = Qt.binding(function() { return root.someOtherValue })
-	}
+    Component.onCompelted: {
+        // Arrow function
+        root.value = Qt.binding(() => root.someOtherValue)
+        // The old way.
+        root.value = Qt.binding(function() { return root.someOtherValue })
+    }
 }
 ```
 
