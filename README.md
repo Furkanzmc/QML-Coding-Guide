@@ -10,7 +10,7 @@
     - [Import Statements](#import-statements)
         + [Import Order](#import-order)
 - [Item 2: Bindings](#item-2-bindings)
-    - [Reduce the Number of Bindings](#reduce-the-number-of-bindings)
+    - [Prefer Bindings over Imperative Assignments](#prefer-bindings-over-imperative-assignments)
     - [Making `Connections`](#making-connections)
     - [Use `Binding` Object](#use-binding-object)
         + [Transient Bindings](#transient-bindings)
@@ -444,66 +444,20 @@ it will also update its position.
 
 So consider the following rules when you are using bindings.
 
-## Reduce the Number of Bindings
+## Prefer Bindings over Imperative Assignments
 
-When using bindings, there are bound to be cases where a single changed signal
-can be used to update multiple values. Consider the following example:
+See the related section on [Qt Documentation](https://doc.qt.io/qt-5/qtquick-bestpractices.html#prefer-declarative-bindings-over-imperative-assignments).
 
-```qml
-Rectangle {
-    id: root
-    color: mouseArea.pressed ? "red" : "yellow"
+The official documentation explains things well, but it is also important to
+understand the performance complications of bindings and understand where the
+bottlenecks can be.
 
-    Text {
-        anchors.centerIn: parent
-        text: mouseArea.pressed ? "Red Color" : "Yellow Color"
-    }
+If you suspect that the performance issue you are having is related to
+excessive evaluations of bindings, then use the QML profiler to confirm your
+suspicion and then opt-in to use imperative option.
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-    }
-}
-```
-
-Now, the bindings are simple in this case so just imagine that they were not
-that simple and we had a bigger app. As you can see there are two bindings and
-each is executed when the user presses the mouse button.
-
-We can rewrite that as follows to reduce the number of bindings to only one.
-
-```qml
-Rectangle {
-    id: root
-
-    Text {
-        id: label
-        anchors.centerIn: parent
-    }
-
-    MouseArea {
-        id: mouseArea
-    	anchors.fill: parent
-    	onPressedChanged: {
-            if (pressed) {
-                root.color = "red";
-                label.text = "Red Color";
-            }
-            else {
-            	root.color = "yellow";
-                label.text = "Yellow Color";
-            }
-    	}
-    }
-}
-```
-
-Now whenever the user presses the mouse button, only one block will be executed
-for two of those expected outcomes.
-
-Alternatively, you can use `Connections` to connect to a particular signal for
-an object and update the properties in the signal handler. This case is particularly
-useful when you are using `Loader`s.
+Refer to the [official documentation](https://doc.qt.io/qtcreator/creator-qml-performance-monitor.html)
+on how to use QML profiler.
 
 ## Making `Connections`
 
