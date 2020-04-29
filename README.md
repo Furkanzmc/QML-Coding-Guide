@@ -50,7 +50,7 @@ are always structured in the following order:
   - Visual Items
   - Qt provided non-visual items
   - Custom provided non-visual items
-- `QtObject` for encapsulating private members
+- `QtObject` for encapsulating private members[1](https://bugreports.qt.io/browse/QTBUG-11984)
 - JavaScript functions
 
 ```qml
@@ -60,7 +60,7 @@ Rectangle {
     property bool thumbnail: false // Property declarations
     property alias image: photoImage.source
 
-    signal clicked // Signal declarations
+    signal clicked() // Signal declarations
 
     x: 20
     y: 20
@@ -82,7 +82,7 @@ Rectangle {
         from: ""; to: "selected"
         ColorAnimation { target: border; duration: 200 }
     }
-    onSomeEvent: {
+    onSomethingHappened: {
 
     }
 
@@ -100,7 +100,7 @@ Rectangle {
     QtObject {
         id: privates
 
-        property var privateProperty: null
+        property bool privateProperty: false
 
     }
 
@@ -120,13 +120,13 @@ When handling the signals attached to an `Item`, make sure to always leave
 Item {
     Component.onCompleted: {
     }
-    onSomeEvent: {
+    onSomethingHappened: {
     }
 }
 
 // Correct
 Item {
-    onSomeEvent: {
+    onSomethingHappened: {
     }
     Component.onCompleted: {
     }
@@ -153,7 +153,7 @@ Item {
         // Line 3
         // Line 4
     }
-    onSomeEvent: {
+    onSomethingHappened: {
         // Line 1
         // Line 2
     }
@@ -161,7 +161,7 @@ Item {
 
 // Correct
 Item {
-    onSomeEvent: {
+    onSomethingHappened: {
         // Line 1
         // Line 2
     }
@@ -223,7 +223,7 @@ Item {
     onOtherEvent: {
     }
     someProperty: true
-    onSomeEvent: {
+    onSomethingHappened: {
     }
     x: 23
     y: 32
@@ -236,7 +236,7 @@ Item {
     someProperty: true
     onOtherEvent: {
     }
-    onSomeEvent: {
+    onSomethingHappened: {
     }
 }
 ```
@@ -268,7 +268,7 @@ Item {
     someProperty: true
     onOtherEvent: {
     }
-    onSomeEvent: {
+    onSomethingHappened: {
     }
 
     function someFunction() {
@@ -471,7 +471,7 @@ get signals that are not meant to be handled.
 // Bad
 Item {
     id: root
-    onSomeEvent: {
+    onSomethingHappened: {
         // Set the target of the Connections.
     }
 
@@ -487,7 +487,7 @@ Item {
 // Good
 Item {
     id: root
-    onSomeEvent: {
+    onSomethingHappened: {
         // Set the target of the Connections.
     }
 
@@ -618,7 +618,7 @@ Item {
     onContentItemChanged: {
         contentItem.width = 100 // This will break the binding.
         // -----
-        var temp = cmpBinding.createObject(root, {
+        const temp = cmpBinding.createObject(root, {
             "target": contentItem,
             "property": "width",
             "value": 100
@@ -688,8 +688,8 @@ Item {
     width: 200
     height: 200
     Component.onCompleted: {
-        var someData = [ 1, 2, 3, 4, 5, 20 ];
-        for (var i = 0; i < someData.length; ++i) {
+        const someData = [ 1, 2, 3, 4, 5, 20 ];
+        for (let i = 0; i < someData.length; ++i) {
             accumulatedValue = accumulatedValue + someData[i];
         }
     }
@@ -715,9 +715,9 @@ Item {
     width: 200
     height: 200
     Component.onCompleted: {
-        var someData = [ 1, 2, 3, 4, 5, 20 ];
-        var temp = accumulatedValue;
-        for (var i = 0; i < someData.length; ++i) {
+        const someData = [ 1, 2, 3, 4, 5, 20 ];
+        let temp = accumulatedValue;
+        for (let i = 0; i < someData.length; ++i) {
             temp = temp + someData[i];
         }
 
@@ -807,6 +807,9 @@ writing a game.), either avoid from context properties or use them for primitive
 types, or types that are inexpensive to convert.
 See [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#conversion-between-qt-and-javascript-types)
 for a list of data types that support conversation and their impact on performance.
+
+Context properties will be deprecated in Qt 6.
+See [QTBUG-73064](https://bugreports.qt.io/browse/QTBUG-73064).
 
 ## Prefer Singletons Over Context Properties
 
@@ -994,11 +997,11 @@ Consider the following example:
 Item {
     id: root
 
-    property var customObject
+    property QtObject customObject
 
     objectName: "my_item_is_alive"
     onCustomObjectChanged: {
-        customObject.somethingChanged.connect(function() {
+        customObject.somethingChanged.connect(() => {
             console.log(root.objectName)
         })
     }
@@ -1081,7 +1084,7 @@ ApplicationWindow {
                 root.myObjects[index].somethingHappened()
             }
             Component.onCompleted: {
-                root.myObjects[index].somethingHappened.connect(function() {
+                root.myObjects[index].somethingHappened.connect(() => {
                     // When the button is destroyed, this will cause the following
                     // error: TypeError: Type error
                     console.log(self.name)
