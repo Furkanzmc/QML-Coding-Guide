@@ -320,27 +320,26 @@ If a component does not need to be accessed for a functionality, avoid setting
 the `id` property. This way you don't clutter the namespace with unused `id`s and
 you'll be less likely to run into duplicate `id` problem.
 
-It is a good idea to use max 3-4 character abbreviation for the `id`s so that
-when you are looking for a certain component, say a `TextBox`, it will be easier
-to list the IDs of all the text boxes by just typing `tb`.
-
-The schema would be `[COMPONENT_NAME][COMPONENT_DESCRIPTION]`, e.g `tbEmail`, `btnLogIn`
+If you want to mark the type with a descriptor but you don't intend to reference
+the type, you can use `objectName` instead.
 
 ```qml
 TextBox {
-    id: tbEmail
+    id: emailField
 }
 
 Button {
-    id: btnSubmit
-}
-
-CheckBox {
-    id: cbAgreement
+    id: submitBtn
 }
 ```
 
 Make sure that the top most component in the file always has `root` as its `id`.
+Qt will make unqualified name look up deprecated in QML 3, so it's better to
+start giving IDs to your components now and use qualified look up.
+
+See [QTBUG-71578](https://bugreports.qt.io/browse/QTBUG-71578) and
+[QTBUG-76016](https://bugreports.qt.io/browse/QTBUG-76016) for more details
+on this.
 
 ### Property Assignments
 
