@@ -9,6 +9,7 @@
     - [Property Assignments](#property-assignments)
     - [Import Statements](#import-statements)
         + [Import Order](#import-order)
+    - [Full Example](#full-example)
 - [Item 2: Bindings](#item-2-bindings)
     - [Prefer Bindings over Imperative Assignments](#prefer-bindings-over-imperative-assignments)
     - [Making `Connections`](#making-connections)
@@ -43,72 +44,21 @@ are always structured in the following order:
 - Property declarations
 - Signal declarations
 - Object properties
+- Attached properties and signal handlers
 - States
 - Transitions
 - Signal handlers
 - Child objects
-  - Visual Items
-  - Qt provided non-visual items
-  - Custom provided non-visual items
+  + Visual Items
+  + Qt provided non-visual items
+  + Custom non-visual items
 - `QtObject` for encapsulating private members[1](https://bugreports.qt.io/browse/QTBUG-11984)
 - JavaScript functions
 
-```qml
-Rectangle {
-    id: photo
-
-    property bool thumbnail: false // Property declarations
-    property alias image: photoImage.source
-
-    signal clicked() // Signal declarations
-
-    x: 20
-    y: 20
-    height: 150
-    color: "gray" // Object properties
-    width: { // Large bindings
-        if (photoImage.width > 200) {
-            photoImage.width;
-        }
-        else {
-            200;
-        }
-    }
-    states: State { // States
-        name: "selected"
-        PropertyChanges { target: border; color: "red" }
-    }
-    transitions: Transition { // Transitions
-        from: ""; to: "selected"
-        ColorAnimation { target: border; duration: 200 }
-    }
-    onSomethingHappened: {
-
-    }
-
-    Rectangle { // Child objects - Visual Items
-        id: border
-        anchors.centerIn: parent; color: "white"
-
-        Image { id: photoImage; anchors.centerIn: parent }
-    }
-
-    Timer { } // Child objects - Qt provided non-visual items
-
-    MyCppObject { } // Child object - Custom provided non-visual items
-
-    QtObject {
-        id: privates
-
-        property bool privateProperty: false
-
-    }
-
-    function doSomething(x) { // JavaScript functions
-        return x + photoImage.width
-    }
-}
-```
+The main purpose for this order is to make sure that the most intrinsic properties of a type is
+always the most visible one in order to make the interface easier to digest at a first glance.
+Although it could be argued that the JavaScript functions are also part of the interface, the ideal
+is to have no functions at all.
 
 ## Signal Handler Ordering
 
@@ -135,12 +85,12 @@ Item {
 
 This is because it mentally makes for a better picture because
 `Component.onCompleted` is expected to be fired when the components construction
-ends.
+is complete.
 
 ------
 
 If there are multiple signal handlers in an `Item`, then the ones with least amount
-of lines are placed at the top. As the implementation lines increases, the handler
+of lines may be placed at the top. As the implementation lines increases, the handler
 also moves down. The only exception to this is `Component.onCompleted` signal, it
 is always placed at the bottom.
 
@@ -284,10 +234,8 @@ More than 2-3 assignments on the same line becomes harder to reason with after
 a while. Or maybe you can keep the one line assignments to whatever line length
 convention you have set up for your project.
 
-Since animations are harder to imageine in your mind, you will benefit from
-keeping the animations as simple as possible since they are executed every
-frame. Try give them meaningful IDs or object names to help your future self
-debug the animation should a problem arise in the future.
+Since animations are harder to imagine in your mind, you will benefit from
+keeping the animations as simple as possible.
 
 ```qml
 // Bad
@@ -318,20 +266,12 @@ SequentialAnimation {
 
 If a component does not need to be accessed for a functionality, avoid setting
 the `id` property. This way you don't clutter the namespace with unused `id`s and
-you'll be less likely to run into duplicate `id` problem.
+you'll be less likely to run into duplicate `id` problem. Also, having an id for
+a type puts additional cognitive stress because it now means that there's
+additional relationships that we need to care for.
 
 If you want to mark the type with a descriptor but you don't intend to reference
-the type, you can use `objectName` instead.
-
-```qml
-TextBox {
-    id: emailField
-}
-
-Button {
-    id: submitBtn
-}
-```
+the type, you can use `objectName` instead old just plain old comments.
 
 Make sure that the top most component in the file always has `root` as its `id`.
 Qt will make unqualified name look up deprecated in QML 3, so it's better to
@@ -404,16 +344,21 @@ This ensures that whenever you make a change to `specialComponent` it will take
 effect in all of the `Loader`s. In the bad example, you would have to duplicate
 the same change.
 
+When in a similar situation without the use of `Loader`, you can use inline
+components.
+
+```qml
+component SomeSpecialComponent: Rectangle {
+
+}
+```
+
 ### Import Statements
 
-Imports take time in QML. And If you are developing for a device with low system
-specifications, then you will want to optimize as much as possible. In that case,
-try to minimize the number of imports you use in your QML file.
-
-If you are also importing a JavaScript file, make sure to not include the same
+If you are importing a JavaScript file, make sure to not include the same
 module in both the QML file and the JavaScript file. JavaScript files share the
-imports from the QML file so you can take advantage of that. Note that Qt Create
-does not provide code completion for the modules that you import in the QML file.
+imports from the QML file so you can take advantage of that. If the JavaScript
+file is meant as a library, this does not apply.
 
 If you are not making use of the imported module in the QML file, consider moving
 the import statement to the JavaScript file. But note that once you import something
@@ -423,6 +368,8 @@ rules see [here](https://doc.qt.io/qt-5/qtqml-javascript-imports.html#imports-wi
 Alternatively, you can use `Qt.include()` which copies the contents of the
 included file and you will not have to worry about the import sharing rules.
 
+As a general rule, you should avoid having unused import statements.
+
 #### Import Order
 
 When importing other modules, use the following order;
@@ -431,6 +378,139 @@ When importing other modules, use the following order;
 - Third party modules
 - Local C++ module imports
 - QML folder imports
+
+### Full Example
+
+```qml
+// First Qt imports
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+// Then custom imports
+import my.library 1.0
+
+Item {
+    id: root
+
+    // ----- Property Declarations
+
+    // Required properties should be at the top.
+    required property int radius: 0
+
+    property int radius: 0
+    property color borderColor: "blue"
+
+    // ----- Signal declarations
+
+    signal clicked()
+    signal doubleClicked()
+
+    // ----- In this section, we group the size and position information together.
+
+    x: 0
+    y: 0
+    z: 0
+    width: 100
+    height: 100
+    anchors.top: parent.top // If a single assignment, dot notation can be used.
+    // If the item is an image, sourceSize is also set here.
+    // sourceSize: Qt.size(12, 12)
+
+    // ----- Then comes the other properties. There's no predefined order to these.
+
+    // Do not use empty lines to separate the assignments. Empty lines are reserved
+    // for separating type declarations.
+    enabled: true
+    layer.enabled: true
+
+    // ----- Then attached properties and attached signal handlers.
+
+    Layout.fillWidth: true
+    Drag.active: false
+    Drag.onActiveChanged: {
+
+    }
+
+    // ----- States and transitions.
+
+    states: [
+        State {
+
+        }
+    ]
+    transitions: [
+        Transitions {
+
+        }
+    ]
+
+    // ----- Signal handlers
+
+    onWidthChanged: { // Always use curly braces.
+
+    }
+    // onCompleted and onDestruction signal handlers are always the last in
+    // the order.
+    Component.onCompleted: {
+
+    }
+    Component.onDestruction: {
+
+    }
+
+    // ----- Visual children.
+
+    Rectangle {
+        height: 50
+        anchors: { // For multiple assignments, use group notation.
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        color: "red"
+        layer: {
+            enabled: true
+            samples: 4
+        }
+    }
+
+    Rectangle {
+        width: parent.width
+        height: 1
+        color: "green"
+    }
+
+    // ----- Qt provided non-visual children
+
+    Timer {
+
+    }
+
+    // ----- Custom non-visual children
+
+    MyCustomNonVisualType {
+
+    }
+
+    QtObject {
+        id: privates
+
+        property int diameter: 0
+    }
+
+    // ----- JavaScript functions
+
+    function collapse() {
+
+    }
+
+    function setCollapsed(value: bool) {
+        if (value === true) {
+        }
+        else {
+        }
+    }
+}
+```
 
 # Item 2: Bindings
 
@@ -1171,7 +1251,7 @@ Item {
 
 # Item 6: Javascript
 
-It is the prevalent advice that you should avoid using JavaScipt as much as possible
+It is the prevalent advice that you should avoid using JavaScript as much as possible
 in your QML code and have the C++ side handle all the logic. This is a sound advice
 and should be followed, but there are cases where you can't avoid having JavaScript
 code for your UI. In those cases, follow these guidelines to ensure a good use of
