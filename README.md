@@ -27,6 +27,7 @@
     - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
 - [Item 5: Signal Handling](#item-5-signal-handling)
     - [Try to Avoid Using connect Function in Models](#try-to-avoid-using-connect-function-in-models)
+    - [When to use Functions and Signals](#when-to-use-functions-and-signals)
 - [Item 6: Javascript](#item-6-javascript)
     - [Use Arrow Functions](#use-arrow-functions)
     - [Use the Modern Way of Declaring Variables](#use-the-modern-way-of-declaring-variables)
@@ -1248,6 +1249,115 @@ Item {
     }
 }
 ```
+
+## When to use Functions and Signals
+
+When coming from imperative programming, it might be very tempting to use signals
+very similar to functions. Resist this temptation. Especially when communicating
+between the C++ layer of your application, misusing signals can be very confusing
+down the line.
+
+Let's first clearly define what a signal should be doing. Here's how
+[Qt](https://doc.qt.io/qt-5/signalsandslots.html#signals) defines it.
+
+> Signals are emitted by an object when its internal state has changed in some
+> way that might be interesting to the object's client or owner. 
+
+This means that whatever happens in the signal handler is a reaction to an
+internal state change of an object. The signal handler should not be changing
+something else in the same object.
+
+See the following example. We have a `ColorPicker` component that we want to use
+to show the user a message when the color is picked. As far as component design
+goes, the fact that the customer sees a message is not `ColorPicker`'s job.
+Its job is to present a dialog and change the color it represents.
+
+```qml
+// ColorPicker.qml
+Rectangle {
+    id: root
+
+    signal colorPicked()
+
+    ColorDialog {
+        onColorChanged: {
+            root.color = color
+            root.colorPicked()
+        }
+    }
+}
+
+// main.qml
+Window {
+    ColorPicker {
+        onColorPicked: {
+            label.text = "Color Changed"
+        }
+    }
+
+    Label {
+        id: label
+    }
+}
+```
+
+The above example is pretty straightforward, the signal handler only reacts to
+a change and does something with that information after which the `ColorPicker`
+object is not affected.
+
+```qml
+// ColorPicker.qml
+Rectangle {
+    id: root
+
+    signal colorPicked(color pickedColor)
+
+    ColorDialog {
+        onColorChanged: {
+            root.colorPicked(color)
+        }
+    }
+}
+
+// main.qml
+Window {
+    ColorPicker {
+        onColorPicked: {
+            color = pickedColor
+            label.text = "Color Changed"
+        }
+    }
+
+    Label {
+        id: label
+    }
+}
+```
+
+In this example, the signal handler not only reacts to an internal state but it
+also changes it. This is a very simple example, and it'll be easy to spot an
+error. However complex your application is, you will always benefit from
+making the distinction clear. Otherwise what you think to be a function at first
+glance might end up being a signal and it loses its semantics of an internal
+state change.
+
+Here's a general principle to follow:
+
+1. When communicating up, use signals.
+2. When communicating down, use functions.
+
+### Communicating with C++ Using Signals
+
+When you have a model that you use in the QML side, it's very possible that you
+are going to run into cases where something that happens in the QML side needs
+to trigger an action in the C++ side.
+
+In these cases, prefer not to invoke any C++ signals from QML side. Instead,
+use a function call or better a property assignment. The C++ object then should
+make the decision whether to fire a signal or not.
+
+If you are using a C++ type instantiated in QML, the same rules apply. You should
+not be emitting signals from QML side.
 
 # Item 6: Javascript
 
