@@ -840,7 +840,7 @@ If you really have to use context properties and you access them repeatedly in
 the same scope, consider assigning the context to a `var` so that it is only
 evaluated once.
 
-```js
+```javascript
 function expensiveOperation() { // Bad
     for (var index in aList) {
         // contextProperty is re-evaluated each time the for loop resets.
@@ -1308,7 +1308,7 @@ Much like in C++, prefer using `const` If you don't want the variable to be assi
 But keep in mind that `const` variables in JavaScript are not immutable. It just
 means they can't be reassigned, but their contents can be changed.
 
-```js
+```javascript
 const value = 32;
 value = 42; // ERROR!
 
