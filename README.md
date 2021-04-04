@@ -1,3 +1,20 @@
+# Introduction
+
+The content that you see here is mostly based on my experience working with QML
+in a large project with a diverse team of developers and designers. I update
+the document as my opinions about certain things become validated by real life
+experience.
+
+You may not agree with some of the ideas laid out here, in those cases please
+create an issue to discuss and update accordingly. I'll keep updating this guide
+as I learn new things. Contributions are vital to this document because it needs
+to reflect tried and validated ideas of more people to make sense in a general
+sense. It's likely that I may not have done a good job at explaining a concept.
+I would appreciate any contributions to improve it.
+
+Please don't hesitate to raise issues and submit PRs. Even the tiniest
+contribution matters.
+
 # Table of Contents
 
 - [Item 1: Code Style](#item-1-code-style)
