@@ -17,41 +17,40 @@ contribution matters.
 
 # Table of Contents
 
-- [Item 1: Code Style](#item-1-code-style)
-    - [Signal Handler Ordering](#signal-handler-ordering)
-    - [Property Ordering](#property-ordering)
-    - [Function Ordering](#function-ordering)
-    - [Animations](#animations)
-    - [Giving Components `id`s](#giving-components-ids)
-    - [Property Assignments](#property-assignments)
-    - [Import Statements](#import-statements)
-        + [Import Order](#import-order)
+- [Code Style](#code-style)
+    - [CS-1: Signal Handler Ordering](#cs-1-signal-handler-ordering)
+    - [CS-2: Property Ordering](#cs-2-property-ordering)
+    - [CS-3: Function Ordering](#cs-3-function-ordering)
+    - [CS-4: Animations](#cs-4-animations)
+    - [CS-5: Giving Components `id`s](#cs-5-giving-components-ids)
+    - [CS-6: Property Assignments](#cs-6-property-assignments)
+    - [CS-7: Import Statements](#cs-7-import-statements)
     - [Full Example](#full-example)
-- [Item 2: Bindings](#item-2-bindings)
-    - [Prefer Bindings over Imperative Assignments](#prefer-bindings-over-imperative-assignments)
-    - [Making `Connections`](#making-connections)
-    - [Use `Binding` Object](#use-binding-object)
+- [Bindings](#bindings)
+    - [B-1: Prefer Bindings over Imperative Assignments](#b-1-prefer-bindings-over-imperative-assignments)
+    - [B-2: Making `Connections`](#b-2-making-connections)
+    - [B-3: Use `Binding` Object](#b-3-use-binding-object)
         + [Transient Bindings](#transient-bindings)
-    - [KISS It](#kiss-it)
-    - [Be Lazy](#be-lazy)
-    - [Avoid Unnecessary Re-Evaluations](#avoid-unnecessary-re-evaluations)
-- [Item 3: C++ Integration](#item-3-c-integration)
-    - [Prefer Context Properties for Primitive Data Types](#prefer-context-properties-for-primitive-data-types)
-    - [Prefer Singletons Over Context Properties](#prefer-singletons-over-context-properties)
-    - [Prefer Instantiated Classes Over Singletons and Context Properties](#prefer-instantiated-classes-over-singletons-and-context-properties)
-    - [Watch Out for Object Ownership Rules](#watch-out-for-object-ownership-rules)
-- [Item 4: Memory Management](#item-4-memory-management)
-    - [Reduce the Number of Implicit Types](#reduce-the-number-of-implicit-types)
-- [Item 5: Signal Handling](#item-5-signal-handling)
-    - [Try to Avoid Using connect Function in Models](#try-to-avoid-using-connect-function-in-models)
-    - [When to use Functions and Signals](#when-to-use-functions-and-signals)
-- [Item 6: Javascript](#item-6-javascript)
-    - [Use Arrow Functions](#use-arrow-functions)
-    - [Use the Modern Way of Declaring Variables](#use-the-modern-way-of-declaring-variables)
-- [Item 7: States and Transitions](#Item-7-states-and-transitions)
-    - [Don't Define Top Level States](#dont-define-top-level-states)
+    - [B-4: KISS It](#b-4-kiss-it)
+    - [B-5: Be Lazy](#b-5-be-lazy)
+    - [B-6: Avoid Unnecessary Re-Evaluations](#b-6-avoid-unnecessary-re-evaluations)
+- [C++ Integration](#c-integration)
+    - [CI-1: Prefer Context Properties for Primitive Data Types](#ci-1-prefer-context-properties-for-primitive-data-types)
+    - [CI-2: Prefer Singletons Over Context Properties](#ci-2-prefer-singletons-over-context-properties)
+    - [CI-3: Prefer Instantiated Classes Over Singletons and Context Properties](#ci-3-prefer-instantiated-classes-over-singletons-and-context-properties)
+    - [CI-4: Watch Out for Object Ownership Rules](#ci-4-watch-out-for-object-ownership-rules)
+- [Performance and Memory](#memory-management)
+    - [PM-1: Reduce the Number of Implicit Types](#pm-1-reduce-the-number-of-implicit-types)
+- [Signal Handling](#signal-handling)
+    - [SH-1: Try to Avoid Using connect Function in Models](#sh-1-try-to-avoid-using-connect-function-in-models)
+    - [SH-2: When to use Functions and Signals](#sh-2-when-to-use-functions-and-signals)
+- [JavaScript](#javascript)
+    - [JS-1: Use Arrow Functions](#js-1-use-arrow-functions)
+    - [JS-2: Use the Modern Way of Declaring Variables](#js-2-use-the-modern-way-of-declaring-variables)
+- [States and Transitions](#states-and-transitions)
+    - [ST-1: Don't Define Top Level States](#st-1-dont-define-top-level-states)
 
-# Item 1: Code Style
+# Code Style
 
 This section provides details about how to format the order of properties, signals,
 and functions to make things easy on the eyes and quickly switch to related code block.
@@ -79,7 +78,7 @@ always the most visible one in order to make the interface easier to digest at a
 Although it could be argued that the JavaScript functions are also part of the interface, the ideal
 is to have no functions at all.
 
-## Signal Handler Ordering
+## CS-1: Signal Handler Ordering
 
 When handling the signals attached to an `Item`, make sure to always leave
 `Component.onCompleted` to the last line.
@@ -143,7 +142,7 @@ Item {
 }
 ```
 
-## Property Ordering
+## CS-2: Property Ordering
 
 The first property assignment must always be the `id` of the component. If you
 want to declare custom properties for a component, the declarations are always
@@ -214,7 +213,7 @@ It is usually harder to see the property assignments If they are mixed with
 signal handlers. That's why we are putting the assignments above the signal
 handlers.
 
-### Function Ordering
+### CS-3: Function Ordering
 
 Although there are no private and public functions in QML, you can provide a
 similar mechanism by wrapping the properties and functions that are only supposed
@@ -245,7 +244,7 @@ Item {
 }
 ```
 
-### Animations
+### CS-4: Animations
 
 When using any subclass of `Animation`, especially nested ones like
 `SequentialAnimation`, try to reduce the number of properties in one line.
@@ -281,7 +280,7 @@ SequentialAnimation {
 }
 ```
 
-### Giving Components `id`s
+### CS-5: Giving Components `id`s
 
 If a component does not need to be accessed for a functionality, avoid setting
 the `id` property. This way you don't clutter the namespace with unused `id`s and
@@ -300,7 +299,7 @@ See [QTBUG-71578](https://bugreports.qt.io/browse/QTBUG-71578) and
 [QTBUG-76016](https://bugreports.qt.io/browse/QTBUG-76016) for more details
 on this.
 
-### Property Assignments
+### CS-6: Property Assignments
 
 When assigning grouped properties, always prefer the dot notation If you are only
 altering just one property. Otherwise, always use the group notation.
@@ -372,7 +371,7 @@ component SomeSpecialComponent: Rectangle {
 }
 ```
 
-### Import Statements
+### CS-7: Import Statements
 
 If you are importing a JavaScript file, make sure to not include the same
 module in both the QML file and the JavaScript file. JavaScript files share the
@@ -531,7 +530,7 @@ Item {
 }
 ```
 
-# Item 2: Bindings
+# Bindings
 
 Bindings are a powerful tool when used responsibly. Bindings are evaluated
 whenever a property it depends on changes and this may result in poor performance
@@ -542,7 +541,7 @@ it will also update its position.
 
 So consider the following rules when you are using bindings.
 
-## Prefer Bindings over Imperative Assignments
+## B-1: Prefer Bindings over Imperative Assignments
 
 See the related section on [Qt Documentation](https://doc.qt.io/qt-5/qtquick-bestpractices.html#prefer-declarative-bindings-over-imperative-assignments).
 
@@ -557,7 +556,7 @@ suspicion and then opt-in to use imperative option.
 Refer to the [official documentation](https://doc.qt.io/qtcreator/creator-qml-performance-monitor.html)
 on how to use QML profiler.
 
-## Making `Connections`
+## B-2: Making `Connections`
 
 A `Connections` object is used to handle signals from arbitrary `QObject` derived
 classes in QML. One thing to keep in mind when using connections is the default
@@ -599,7 +598,7 @@ Item {
 }
 ```
 
-## Use `Binding` Object
+## B-3: Use `Binding` Object
 
 `Binding`'s `when` property can be used to enable or disable a binding expression
 depending on a condition. If the binding that you are using is complex and does
@@ -735,7 +734,7 @@ Item {
 }
 ```
 
-## KISS It
+## B-4: KISS It
 
 You are probably already familiar with the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
 QML supports optimization of binding expressions. Optimized bindings do not require
@@ -746,7 +745,7 @@ compile time.
 So, avoid accessing `var` properties. You can see the full list of prerequisites
 of optimized bindings [here](https://doc.qt.io/qt-5/qtquick-performance.html#bindings).
 
-## Be Lazy
+## B-5: Be Lazy
 
 There may be cases where you don't need the binding immediately but when a certain
 condition is met. By lazily creating a binding, you can avoid unnecessary executions.
@@ -767,7 +766,7 @@ Item {
 
 You can also use `Qt.callLater` to reduce the redundant calls to a function.
 
-## Avoid Unnecessary Re-Evaluations
+## B-6: Avoid Unnecessary Re-Evaluations
 
 If you have a loop or process where you update the value of the property, you may
 want to use a temporary local variable where you accumulate those changes and only
@@ -831,7 +830,7 @@ Item {
 }
 ```
 
-# Item 3: C++ Integration
+# C++ Integration
 
 QML can be extended with C++ by exposing the `QObject` classes using the `Q_OBJECT`
 macro or custom data types using `Q_GADGET` macro.
@@ -839,7 +838,7 @@ It always should be preferred to use C++ to add functionality to a QML applicati
 But it is important to know which is the best way to expose your C++ classes, and
 it depends on your use case.
 
-## Prefer Context Properties for Primitive Data Types
+## CI-1: Prefer Context Properties for Primitive Data Types
 
 Context properties are registered using
 
@@ -910,7 +909,7 @@ for a list of data types that support conversation and their impact on performan
 Context properties will be deprecated in Qt 6.
 See [QTBUG-73064](https://bugreports.qt.io/browse/QTBUG-73064).
 
-## Prefer Singletons Over Context Properties
+## CI-2: Prefer Singletons Over Context Properties
 
 There are bound to be cases where you have to provide a single instance for a
 functionality or common data access. In this situation, resort to using a singleton
@@ -936,7 +935,7 @@ public:
 qmlRegisterSingletonType<SingletonTest>("MyNameSpace", 1, 0, "MySingletonClass", MySingletonClass::singletonProvider);
 ```
 
-## Prefer Instantiated Classes Over Singletons and Context Properties
+## CI-3: Prefer Instantiated Classes Over Singletons and Context Properties
 
 Context properties and singletons are sufficient solution If you are not concerned
 about milking every CPU cycle you can. They are good and standard solutions to a
@@ -952,7 +951,7 @@ classes unwarranted performance concerns.
 Go [here](https://github.com/Furkanzmc/QML-Cpp-Access-Speed-Test) to see a
 comparison of the three exposing methods compare against each other.
 
-## Watch Out for Object Ownership Rules
+## CI-4: Watch Out for Object Ownership Rules
 
 When you are exposing data to QML from C++, you are likely to pass around custom
 data types as well. It is important to realize the implications of ownership when
@@ -972,13 +971,13 @@ ownership rules see [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html
 
 To learn more about the real life implications of this read [this blog post](https://www.embeddeduse.com/2018/04/02/qml-engine-deletes-c-objects-still-in-use/).
 
-# Item 4: Memory Management
+# Memory Management
 
 Most applications are not likely to have memory limitations. But in case you are
 working on a memory limited hardware or you just really care about memory allocations,
 follow these steps to reduce your memory usage.
 
-## Reduce the Number of Implicit Types
+## PM-1: Reduce the Number of Implicit Types
 
 If a type defines custom properties, that type becomes an implicit type to the JS
 engine and additional type information has to be stored.
@@ -1044,13 +1043,13 @@ In the second example, total memory usage is 288b. This is really a minute
 difference in this context, but as the number of components increase in a
 project with memory constrained hardware, it can start to make a difference.
 
-# Item 5: Signal Handling
+# Signal Handling
 
 Signals are a very powerful mechanism in Qt/QML. And the fact that you can
 connect to signals from C++ makes it even better. But in some situations, If you
 don't handle them correctly you might end up scratching your head.
 
-## Try to Avoid Using connect Function in Models
+## SH-1: Try to Avoid Using connect Function in Models
 
 You can have signals in the QML side, and the C++ side. Here's an example for
 both cases.
@@ -1268,7 +1267,7 @@ Item {
 }
 ```
 
-## When to use Functions and Signals
+## SH-2: When to use Functions and Signals
 
 When coming from imperative programming, it might be very tempting to use signals
 very similar to functions. Resist this temptation. Especially when communicating
@@ -1377,7 +1376,7 @@ make the decision whether to fire a signal or not.
 If you are using a C++ type instantiated in QML, the same rules apply. You should
 not be emitting signals from QML side.
 
-# Item 6: Javascript
+# JavaScript
 
 It is the prevalent advice that you should avoid using JavaScript as much as possible
 in your QML code and have the C++ side handle all the logic. This is a sound advice
@@ -1385,7 +1384,7 @@ and should be followed, but there are cases where you can't avoid having JavaScr
 code for your UI. In those cases, follow these guidelines to ensure a good use of
 JavaScript in QML.
 
-## Use Arrow Functions
+## JS-1: Use Arrow Functions
 
 Arrow functions were introduced in ES6. Its syntax is pretty close to C++ lambdas
 and they have a pretty neat feature that makes them most comfortable to use
@@ -1410,7 +1409,7 @@ Item {
 The arrow function version is easier on the eyes and cleaner to write.
 For more information about arrow functions, head over to the [MDN Blog](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)
 
-## Use the Modern Way of Declaring Variables
+## JS-2: Use the Modern Way of Declaring Variables
 
 With ES6, there are 3 ways of delcaring a variable: `var`, `let`, and `const`.
 
@@ -1447,12 +1446,12 @@ obj.value = 42; // Valid.
 See the MDN posts on [const](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const)
 and [let](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let)
 
-# Item 7: States and Transitions
+# States and Transitions
 
 States and transitions are a powerful way to create dynamic UIs. Here are some things to keep in
 mind when you are using them in your projects.
 
-## Don't Define Top Level States
+## ST-1: Don't Define Top Level States
 
 Defining states at the top-level of a reusable component can cause breakages if the user of your
 components also define their own states for their specific use case. 
