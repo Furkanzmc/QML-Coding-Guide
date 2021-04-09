@@ -49,6 +49,8 @@ contribution matters.
     - [JS-2: Use the Modern Way of Declaring Variables](#js-2-use-the-modern-way-of-declaring-variables)
 - [States and Transitions](#states-and-transitions)
     - [ST-1: Don't Define Top Level States](#st-1-dont-define-top-level-states)
+- [Visual Items](#visual-items)
+    - [VI-1: Distinguish Between Different Types of Sizes](#vi-1-distinguish-between-different-types-of-sizes)
 
 # Code Style
 
@@ -1567,3 +1569,83 @@ Rectangle {
 ```
 
 With this change, the button will both change its color and text when the mouse is hovered above it.
+
+
+# Visual Items
+
+Visual items are at the core of QML, anything that you see in the window (or don't see because of
+transparency) are visual items. Having a good understanding of the visual items, their relationship
+to each other, sizing, and positioning will help you create a more robust UI for your application.
+
+## VI-1: Distinguish Between Different Types of Sizes
+
+When thinking about geometry, we think in terms of `x`, `y`, `width` and `height`. This defines
+where our items shows up in the scene and how big it is. `x` and `y` are pretty straightforward but
+we can't really say the same about the size information in QML.
+
+There's 2 different types of size information that you get from various visual items:
+
+1. Explicit size: `width`, `height`
+2. Implicit size: `implicitWidth`, `implicitHeight`
+
+A good understanding of these different types is important to building a reusable library of
+components.
+
+### Explicit Size
+
+It's in the name. This is the size that you explicitly assign to an `Item`. By default, `Item`s do
+not have an explicit size and its size will always be `Qt.size(0, 0)`.
+
+```qml
+// No explicit size is set. You won't see this in your window.
+Rectangle {
+    color: "red"
+}
+
+// Explicit size is set. You'll see a yellow rectangle.
+Rectangle {
+    width: 100
+    height: 100
+    color: "yellow"
+}
+```
+
+### Implicit Size
+
+Implicit size refers to the size that an `Item` occupies by default to display itself properly.
+This size is not set automatically for any `Item`. You, as a component designer, need to make a
+decision about this size and set it to your component.
+
+The other thing to note is that [Qt internally
+knows](https://github.com/qt/qtdeclarative/blob/dev/src/quick/items/qquickitem.h#L418) if it has an
+explicit size or not. So, when an explicit size is not set, it will use the implicit size.
+
+```qml
+// Even though there's no explicit size, it will have a size of Qt.size(100, 100)
+Rectangle {
+    implicitWidth: 100
+    implicitHeight: 100
+    color: "red"
+}
+```
+
+-----
+
+Whenever you are building a reusable component, never set an explicit size within the component but
+instead choose to provide a sensible implicit size. This way, the user of your components can freely
+manipulate its size and when they need to return to a default size, they can always default to the
+implicit size so they don't have to store a different default size for the component. This feature
+is also very useful if you want to implement a resize-to-fit feature.
+
+When a user is using your component, they may not bother to set a size for it.
+
+```qml
+CheckBox {
+    text: "Check Me Out"
+}
+```
+
+In the example above, the check box would only be visible If there was a sensible implicit size for
+it. This implicit size needs to take into account its visual components (the box, the label etc.) so
+that we can see the component properly. If this is not provided, it's difficult for the user of your
+component to set a proper size for it.
