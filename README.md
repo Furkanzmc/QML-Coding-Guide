@@ -48,7 +48,8 @@ contribution matters.
 - [Item 6: Javascript](#item-6-javascript)
     - [Use Arrow Functions](#use-arrow-functions)
     - [Use the Modern Way of Declaring Variables](#use-the-modern-way-of-declaring-variables)
-
+- [Item 7: States and Transitions](#Item-7-states-and-transitions)
+    - [Don't Define Top Level States](#dont-define-top-level-states)
 
 # Item 1: Code Style
 
@@ -1445,3 +1446,125 @@ obj.value = 42; // Valid.
 
 See the MDN posts on [const](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/const)
 and [let](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let)
+
+# Item 7: States and Transitions
+
+States and transitions are a powerful way to create dynamic UIs. Here are some things to keep in
+mind when you are using them in your projects.
+
+## Don't Define Top Level States
+
+Defining states at the top-level of a reusable component can cause breakages if the user of your
+components also define their own states for their specific use case. 
+
+```qml
+// MyButton.qml
+Rectangle {
+    id: root
+
+    property alias text: lb.text
+    property alias hovered: ma.containsMouse
+
+    color: "red"
+    states: [
+        State {
+            when: ma.containsMouse
+
+            PropertyChanges {
+                target: root
+                color: "yellow"
+            }
+        }
+    ]
+
+    MouseArea {
+        id: ma
+        anchors.fill: parent
+        hoverEnabled: true
+    }
+
+    Label {
+        id: lb
+        anchors.centerIn: parent
+    }
+}
+
+// MyItem.qml
+Item {
+    MyButton {
+        id: btn
+        text: "Not Hovering"
+        // The states of the original component are not actually overwritten.
+        // The new state is added to the existing states.
+        states: [
+            State {
+                when: btn.hovered
+
+                PropertyChanges {
+                    target: btn
+                    text: "Hovering"
+                }
+            }
+        ]
+    }
+}
+```
+When you assign a new value to `states` or any other `QQmlListProperty`, the new value does not
+overwrite the existing one but adds to it. In the example above, the new state is added to the
+existing list of states that we already have in `MyButton.qml`. Since we can only have one active
+state in an item, our hover state will be messed up.
+
+In order to avoid this problem, create your top-level state in a separate item or use a
+`StateGroup`.
+
+```qml
+Rectangle {
+    id: root
+
+    property alias text: lb.text
+    property alias hovered: ma.containsMouse
+
+    color: "red"
+
+    MouseArea {
+        id: ma
+        anchors.fill: parent
+        hoverEnabled: true
+    }
+
+    Label {
+        id: lb
+        anchors.centerIn: parent
+    }
+
+    // A State group or
+    StateGroup {
+        states: [
+            State {
+                when: ma.containsMouse
+
+                PropertyChanges {
+                    target: root
+                    color: "yellow"
+                }
+            }
+        ]
+    }
+
+    // another item
+    Item {
+        states: [
+            State {
+                when: ma.containsMouse
+
+                PropertyChanges {
+                    target: root
+                    color: "yellow"
+                }
+            }
+        ]
+    }
+}
+```
+
+With this change, the button will both change its color and text when the mouse is hovered above it.
