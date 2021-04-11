@@ -35,9 +35,9 @@ contribution matters.
     - [B-5: Be Lazy](#b-5-be-lazy)
     - [B-6: Avoid Unnecessary Re-Evaluations](#b-6-avoid-unnecessary-re-evaluations)
 - [C++ Integration](#c-integration)
-    - [CI-1: Prefer Context Properties for Primitive Data Types](#ci-1-prefer-context-properties-for-primitive-data-types)
-    - [CI-2: Prefer Singletons Over Context Properties](#ci-2-prefer-singletons-over-context-properties)
-    - [CI-3: Prefer Instantiated Classes Over Singletons and Context Properties](#ci-3-prefer-instantiated-classes-over-singletons-and-context-properties)
+    - [CI-1: Avoid Context Properties](#ci-1-avoid-context-properties)
+    - [CI-2: Use Singleton for Common API Access](#ci-2-use-singleton-for-common-api-access)
+    - [CI-3: Prefer Instantiated Types Over Singletons For Data](#ci-3-prefer-instantiated-types-over-singletons-for-data)
     - [CI-4: Watch Out for Object Ownership Rules](#ci-4-watch-out-for-object-ownership-rules)
 - [Performance and Memory](#performance-and-memory)
     - [PM-1: Reduce the Number of Implicit Types](#pm-1-reduce-the-number-of-implicit-types)
@@ -840,7 +840,7 @@ It always should be preferred to use C++ to add functionality to a QML applicati
 But it is important to know which is the best way to expose your C++ classes, and
 it depends on your use case.
 
-## CI-1: Prefer Context Properties for Primitive Data Types
+## CI-1: Avoid Context Properties
 
 Context properties are registered using
 
@@ -848,70 +848,18 @@ Context properties are registered using
 rootContext()->setContextProperty("someProperty", QVariant());
 ```
 
-Context properties always takes in a `QVariant`, which means that whenever you
-access the property it is re-evaluated because in between each access the property
-may be changed as `setContextProperty()` can be used at any moment in time.
+Context properties always takes in a `QVariant`, which means that whenever you access the property
+it is re-evaluated because in between each access the property may be changed as
+`setContextProperty()` can be used at any moment in time.
 
-If you are exposing context properties, set them before loading the `main.qml`
-file otherwise your UI would be blocked. Doing it before loading the window at
-least hides a window freeze from the user.
+Context properties are expensive to access, and hard to reason with. When you are writing QML code,
+you should strive to reduce the use of contextual variables (A variable that doesn't exist in the
+immediate scope, but the one above it.) and global state. Each QML document should be able to run
+with QML scene provided that the required properties are set.
 
-If you really have to use context properties and you access them repeatedly in
-the same scope, consider assigning the context to a `var` so that it is only
-evaluated once.
-
-```javascript
-function expensiveOperation() { // Bad
-    for (var index in aList) {
-        // contextProperty is re-evaluated each time the for loop resets.
-        // For long operations, this may significantly affect the performance
-        // and block the UI.
-        contextProperty.someOperation(aList[index]);
-    }
-}
-
-function expensiveOperation() { // Less Bad
-    var context = contextProperty; // Only evaluated once.
-    for (var index in aList) {
-        context.someOperation(aList[index]);
-    }
-}
-```
-
-Since the cost of accessing context properties is expensive, calling a method
-from a context property is even more expensive. So, keep your context properties
-for only primitive types If you really have to use context properties. An example
-use case could be adding the macro equivalents for QML code. For example, If you
-want to have different behaviors based on the build type, you could do something
-like the following.
-
-```cpp
-#ifdef QT_DEBUG
-    rootContext->setContextProperty("QT_DEBUG", QVariant(true));
-#else
-    rootContext->setContextProperty("QT_DEBUG", QVariant(false));
-#endif
-```
-
-And then have different behavior in QML.
-
-```qml
-MyItem {
-    someProperty: QT_DEBUG ? 32 : 23
-}
-```
-
-This will not have a significant impact If you have an infrequent use of the context
-property or for a small app. But If you are concerned with performance (e.g when
-writing a game.), either avoid from context properties or use them for primitive
-types, or types that are inexpensive to convert.
-See [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html#conversion-between-qt-and-javascript-types)
-for a list of data types that support conversation and their impact on performance.
-
-Context properties will be deprecated in Qt 6.
 See [QTBUG-73064](https://bugreports.qt.io/browse/QTBUG-73064).
 
-## CI-2: Prefer Singletons Over Context Properties
+## CI-2: Use Singleton for Common API Access
 
 There are bound to be cases where you have to provide a single instance for a
 functionality or common data access. In this situation, resort to using a singleton
@@ -934,24 +882,183 @@ public:
 };
 
 // In main.cpp
-qmlRegisterSingletonType<SingletonTest>("MyNameSpace", 1, 0, "MySingletonClass", MySingletonClass::singletonProvider);
+qmlRegisterSingletonType<SingletonTest>("MyNameSpace", 1, 0, "MySingletonClass",
+                                        MySingletonClass::singletonProvider);
 ```
 
-## CI-3: Prefer Instantiated Classes Over Singletons and Context Properties
+You should strive to not use singletons for shared data access. Reusable components are especially
+a bad place to access singletons. Ideally, all QML documents should rely on the customization
+through properties to change its content.
 
-Context properties and singletons are sufficient solution If you are not concerned
-about milking every CPU cycle you can. They are good and standard solutions to a
-problem and there will be cases where they make more sense. But instantiated classes
-in QML outperform both of those significantly. Also, since instantiated classes
-have parents, you don't have to dispose them manually. But with context properties
-and singletons it will not be the case.
+Let's imagine a scenario where we are creating a paint app where we can change the currently
+selected color on the palette. We only have one instance of the palette, and the data from this is
+accessed throughout our C++ code. So we decided that it makes sense to expose it as a singleton to
+QML side.
 
-So, analyze your situation and try to stick to the solution that most suits the
-problem at hand. Don't over use context properties or singletons or instantiated
-classes unwarranted performance concerns.
+```qml
+// ColorViewer.qml
+Row {
+    id: root
 
-Go [here](https://github.com/Furkanzmc/QML-Cpp-Access-Speed-Test) to see a
-comparison of the three exposing methods compare against each other.
+    Rectangle {
+        color: Palette.selectedColor
+    }
+
+    Text {
+        text: Palette.selectedColorName
+    }
+}
+```
+
+With this code, we bind our component to `Palette` singleton. Who ever wants to use our `ColorViewer`
+they won't be able to change it so they can show some other selected color.
+
+```qml
+// ColorViewer_2.qml
+Row {
+    id: root
+
+    property alias selectedColor: colorIndicator.color
+    property alias selectedColorName: colorLabel.color
+
+    Rectangle {
+        id: colorIndicator
+        color: Palette.selectedColor
+    }
+
+    Text {
+        id: colorLabel
+        text: Palette.selectedColorName
+    }
+}
+```
+
+This would allow the users of this component to set the color and the name from outside, but we
+still have a dependency on the singleton.
+
+```qml
+// ColorViewer_3.qml
+Row {
+    id: root
+
+    property alias selectedColor: colorIndicator.color
+    property alias selectedColorName: colorLabel.color
+
+    Rectangle {
+        id: colorIndicator
+    }
+
+    Text {
+        id: colorLabel
+    }
+}
+```
+
+This version allows you to de-couple from the singleton, enable it to be resuable in any context
+that wants to show a selected color, and you could easily run this through `qmlscene` and inspect
+its behavior.
+
+## CI-3: Prefer Instantiated Types Over Singletons For Data
+
+Instantiated types are exposed to QML using:
+
+```cpp
+// In main.cpp
+qmlRegisterType<ColorModel>("MyNameSpace", 1, 0, "ColorModel");
+```
+
+Instantiated types have the benefit of having everything available to you to understand and digest
+in the same document. They are easier to change at run-time without creating side effects, and easy
+to reason with because when looking at a document, you don't need to worry about any global state
+but the state of the type that you are dealing with at hand.
+
+```qml
+// ColorsWindow.qml
+Window {
+    id: root
+
+    Column {
+        Repeater {
+            model: Palette.selectedColors
+            delegate: ColorViewer {
+                required property color color
+                required property string colorName
+
+                selectedColor: color
+                selectedColorName: colorName
+            }
+        }
+    }
+}
+```
+
+The code above is a perfectly valid QML code. We'll get our model from the singleton, and display it
+with the reusable component we created in CI-2. However, there's still a problem here. `ColorsWindow`
+is now bound to the model from `Palette` singleton. And If I wanted to have the user select two
+different sets of colors, I would need to create another file with the same contents and use that.
+Now we have 2 components doing basically the same thing. And those two components need to be
+maintained.
+
+This also makes it hard to prototype. If I wanted to see two different versions of this window with
+different colors at the same time, I can't do it because I'm using a singleton. Or, If I wanted to
+pop up a new window that shows the users the variants of a color set, I can't do it because the data
+is bound to the singleton.
+
+A better approach here is to either use an instantiated type or expect the model as a property.
+
+```qml
+// ColorsWindow.qml
+Window {
+    id: root
+
+    property PaletteColorsModel model
+
+    Column {
+        Repeater {
+            model: root.model
+            // Alternatively
+            model: PaletteColorsModel { }
+            delegate: ColorViewer {
+                required property color color
+                required property string colorName
+
+                selectedColor: color
+                selectedColorName: colorName
+            }
+        }
+    }
+}
+```
+
+Now, I can have the same window up at the same time with different color sets because they are not
+bound to a singleton. During prototyping, I can provide a dummy data easily by adding
+`PaletteColorElement` types to the model, or by requesting test dataset with something like:
+
+```qml
+PaletteColorsModel {
+    testData: "prototype_1"
+}
+```
+
+This test data could be auto-generated, or it could be provided by a JSON file. The beauty is that
+I'm no longer bound to a singleton, that I have the freedom to instantiate as many of these windows
+as I want.
+
+There may be cases where you actually truly want the data to be the same every where. In these
+cases, you should still provide an instantiated type instead of a singleton. You can still access
+the same resource in the C++ implementation of your model and provide that to QML. And you would
+still retain the freedom of making your data easily pluggable in different context and it would
+increase the re-usability of your code.
+
+```cpp
+class PaletteColorsModel
+{
+    explicit PaletteColorsModel(QObject* parent = nullptr)
+    {
+        initializeModel(MyColorPaletteSingleton::instance().selectedColors());
+    }
+};
+```
 
 ## CI-4: Watch Out for Object Ownership Rules
 
