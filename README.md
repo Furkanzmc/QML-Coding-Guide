@@ -39,7 +39,7 @@ contribution matters.
     - [CI-2: Prefer Singletons Over Context Properties](#ci-2-prefer-singletons-over-context-properties)
     - [CI-3: Prefer Instantiated Classes Over Singletons and Context Properties](#ci-3-prefer-instantiated-classes-over-singletons-and-context-properties)
     - [CI-4: Watch Out for Object Ownership Rules](#ci-4-watch-out-for-object-ownership-rules)
-- [Performance and Memory](#memory-management)
+- [Performance and Memory](#performance-and-memory)
     - [PM-1: Reduce the Number of Implicit Types](#pm-1-reduce-the-number-of-implicit-types)
 - [Signal Handling](#signal-handling)
     - [SH-1: Try to Avoid Using connect Function in Models](#sh-1-try-to-avoid-using-connect-function-in-models)
@@ -973,7 +973,7 @@ ownership rules see [here](https://doc.qt.io/qt-5/qtqml-cppintegration-data.html
 
 To learn more about the real life implications of this read [this blog post](https://www.embeddeduse.com/2018/04/02/qml-engine-deletes-c-objects-still-in-use/).
 
-# Memory Management
+# Performance and Memory
 
 Most applications are not likely to have memory limitations. But in case you are
 working on a memory limited hardware or you just really care about memory allocations,
