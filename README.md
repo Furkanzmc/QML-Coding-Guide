@@ -51,6 +51,8 @@ contribution matters.
     - [ST-1: Don't Define Top Level States](#st-1-dont-define-top-level-states)
 - [Visual Items](#visual-items)
     - [VI-1: Distinguish Between Different Types of Sizes](#vi-1-distinguish-between-different-types-of-sizes)
+    - [VI-2: Be Careful with a Transparent `Rectangle`](#vi-2-be-careful-with-a-transparent-rectangle)
+
 
 # Code Style
 
@@ -1756,3 +1758,135 @@ In the example above, the check box would only be visible If there was a sensibl
 it. This implicit size needs to take into account its visual components (the box, the label etc.) so
 that we can see the component properly. If this is not provided, it's difficult for the user of your
 component to set a proper size for it.
+
+## VI-2: Be Careful with a Transparent `Rectangle`
+
+`Rectangle` should never be used with a transparent color except when you need to draw a border.
+This is especially true if you are using a `Rectangle` as part of a delegate that's supposed to be
+created in a batch.
+
+Drawing transparent/translucent content takes more time because translucency requires blending.
+Opaque content is optimized better by the renderer.
+
+In order to avoid paying the penalty, look for ways that you can defer the use of a transparent
+`Rectangle`. Maybe you can show it on hover, or during certain events and set it to invisible when
+it's no longer needed. Alternatively, you can put the `Rectangles` in an asynchronous `Loader`.
+
+Here's a sample QML code to demonstrate the difference between using an opaque rectangle and a
+transparent one when it comes to the creation time of these components.
+
+```qml
+Window {
+    visible: true
+
+    Row {
+        Button {
+            text: "Rect"
+            onClicked: {
+                console.time("Rect")
+                rprect.model = rprect.model + 10000
+                console.timeEnd("Rect")
+            }
+        }
+
+        Button {
+            text: "Transparent"
+            onClicked: {
+                console.time("Transparent")
+                rptrans.model = rptrans.model + 10000
+                console.timeEnd("Transparent")
+            }
+        }
+
+        Button {
+            text: "Transparent Loader"
+            onClicked: {
+                console.time("Transparent Loader")
+                rploader.model = rploader.model + 10000
+                console.timeEnd("Transparent Loader")
+            }
+        }
+
+        Button {
+            text: "Translucent"
+            onClicked: {
+                console.time("Translucent")
+                rptransl.model = rptransl.model + 10000
+                console.timeEnd("Translucent")
+            }
+        }
+
+        Button {
+            text: "Reset"
+            onClicked: {
+                rprect.model = 0
+                rptrans.model = 0
+                rptransl.model = 0
+                rploader.model = 0
+            }
+        }
+    }
+
+    Repeater {
+        id: rptrans
+        model: 0
+        delegate: Rectangle {
+            width: 10
+            height: 10
+            color: "transparent"
+        }
+    }
+
+    Repeater {
+        id: rptransl
+        model: 0
+        delegate: Rectangle {
+            width: 10
+            height: 10
+            opacity: 0.5
+            color: "red"
+        }
+    }
+
+    Repeater {
+        id: rprect
+        model: 0
+        delegate: Rectangle {
+            width: 10
+            height: 10
+            color: "red"
+        }
+    }
+
+    Repeater {
+        id: rploader
+        model: 0
+        // This will speed things up. You can defer the creation of the rectangle to when it makes
+        // sense and since it's asynchronous it won't block the UI thread.
+        delegate: Loader {
+            asynchronous: true
+            sourceComponent: Rectangle {
+                width: 10
+                height: 10
+                opacity: 0.5
+                color: "transparent"
+            }
+        }
+    }
+}
+```
+
+When you run this example for the first time and create solid rectangles, you'll notice that the
+creation is pretty fast. If you close it and run it again, but this time create transparent or
+translucent ones you'll see that the time reported does not actually differ that much from the
+solid rectangle.
+
+The real problem starts presenting itself when you are creating new transparent items when there's
+already rectangles on the scene. Try creating first the solid ones and then the transparent ones.
+You'll see that the time difference is very noticeable.
+
+Please note that this will not matter that much when you are drawing a few rectangles here and
+there. The problem will present itself when you are using translucency in the context of a delegate
+because there can potentially be creating thousands of these rectangles.
+
+See also: [Translucent vs Opaque](https://doc.qt.io/qt-5/qtquick-performance.html#translucent-vs-opaque)
