@@ -52,6 +52,8 @@ contribution matters.
 - [Visual Items](#visual-items)
     - [VI-1: Distinguish Between Different Types of Sizes](#vi-1-distinguish-between-different-types-of-sizes)
     - [VI-2: Be Careful with a Transparent `Rectangle`](#vi-2-be-careful-with-a-transparent-rectangle)
+- [Component Design](#component-design)
+    - [CD-1: Understand the Difference Between a Delegate and a Component](#cd-1-understand-the-difference-between-a-delegate-and-a-component)
 
 
 # Code Style
@@ -1890,3 +1892,15 @@ there. The problem will present itself when you are using translucency in the co
 because there can potentially be creating thousands of these rectangles.
 
 See also: [Translucent vs Opaque](https://doc.qt.io/qt-5/qtquick-performance.html#translucent-vs-opaque)
+
+# Component Design
+
+DRY is a concept that's not only important in UI programming but in any kind of programming. We
+don't want to be duplicating code for each button that we put in our window. We need to keep DRY
+principle in mind when we are designing our components. But like everything, there's right and
+wrong ways of doing it.
+
+This section focuses on reusable component design.
+
+## CD-1: Understand the Difference Between a Delegate and a Component
+
