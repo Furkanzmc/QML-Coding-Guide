@@ -22,7 +22,7 @@ contribution matters.
     - [CS-2: Property Initialization Order](#cs-2-property-initialization-order)
     - [CS-3: Function Ordering](#cs-3-function-ordering)
     - [CS-4: Animations](#cs-4-animations)
-    - [CS-5: Giving Components `id`s](#cs-5-giving-components-ids)
+    - [CS-5: Specifying IDs for Objects](#cs-5-specifying-ids-for-objects)
     - [CS-6: Property Assignments](#cs-6-property-assignments)
     - [CS-7: Import Statements](#cs-7-import-statements)
     - [Full Example](#full-example)
@@ -284,16 +284,15 @@ SequentialAnimation {
 }
 ```
 
-### CS-5: Giving Components `id`s
+### CS-5: Specifying IDs for Objects
 
-If a component does not need to be accessed for a functionality, avoid setting
-the `id` property. This way you don't clutter the namespace with unused `id`s and
-you'll be less likely to run into duplicate `id` problem. Also, having an id for
-a type puts additional cognitive stress because it now means that there's
-additional relationships that we need to care for.
+If an object does not need to be accessed for a functionality, avoid setting the `id` property.
+This way you'll be less likely to run into duplicate `id` problem. Also, having an id for an object
+puts additional cognitive stress because it now means that there's additional relationships that we
+need to care for.
 
 If you want to mark the type with a descriptor but you don't intend to reference
-the type, you can use `objectName` instead old just plain old comments.
+the type, you can use `objectName` instead or just plain old comments.
 
 Make sure that the top most component in the file always has `root` as its `id`.
 Qt will make unqualified name look up deprecated in QML 3, so it's better to
