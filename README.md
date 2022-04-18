@@ -30,7 +30,6 @@ contribution matters.
     - [B-1: Prefer Bindings over Imperative Assignments](#b-1-prefer-bindings-over-imperative-assignments)
     - [B-2: Making `Connections`](#b-2-making-connections)
     - [B-3: Use `Binding` Object](#b-3-use-binding-object)
-        + [Transient Bindings](#transient-bindings)
     - [B-4: KISS It](#b-4-kiss-it)
     - [B-5: Be Lazy](#b-5-be-lazy)
     - [B-6: Avoid Unnecessary Re-Evaluations](#b-6-avoid-unnecessary-re-evaluations)
@@ -645,127 +644,44 @@ case unless the binding expression is expensive (e.g It changes the item's
 `anchor` which causes a whole chain reaction and causes other items to be
 repositioned.).
 
-`Binding` objects can also be used to provide bidirectional binding for
-properties without the risk of breaking the bindings. Consider the following
-example:
-
-```qml
-Rectangle {
-    id: rect
-    width: 50
-    height: 50
-    anchors.centerIn: parent
-    color: cd.color
-
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: {
-            if (mouse.button === Qt.LeftButton) {
-                cd.visible = true;
-            }
-            else {
-                parent.color = "black"
-            }
-        }
-    }
-}
-
-ColorDialog {
-    id: cd
-    color: rect.color
-}
-```
-
-The binding to `color` properties of `ColorDialog` and `Rectangle` will be broken
-once those proeprties are set from outside. If you play around with the example,
-you'll see that `parent.color = "black"` breaks the binding.
-
-Now, see the following example and you'll find that bindings are not broken.
-
-```qml
-Rectangle {
-    id: rect
-    width: 50
-    height: 50
-    anchors.centerIn: parent
-    color: "red"
-
-    Binding on color {
-        value: cd.color
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: {
-            if (mouse.button === Qt.LeftButton) {
-                cd.visible = true;
-            }
-            else {
-                parent.color = "black"
-            }
-        }
-    }
-}
-
-ColorDialog {
-    id: cd
-
-    Binding on color {
-        value: rect.color
-    }
-}
-```
-
-### Transient Bindings
-
-There may be cases where you have to end up using an imperative assignment. But
-naturally this will break the binding. In that case, you can create transient
-`Binding` objects to safely set the new property without breaking the existing
-binding.
-
-```qml
-Item {
-    property var contentItem
-
-    onContentItemChanged: {
-        contentItem.width = 100 // This will break the binding.
-        // -----
-        const temp = cmpBinding.createObject(root, {
-            "target": contentItem,
-            "property": "width",
-            "value": 100
-        })
-        // Now the width property is safely updated to 100 without breaking
-        // any existing bindings.
-        temp.destroy() // Don't forget to destroy it.
-    }
-
-    Component {
-        id: cmpBinding
-
-        Binding { }
-    }
-}
-```
-
 ## B-4: KISS It
 
-You are probably already familiar with the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
+Removed. No longer applies. Keeping the record to not mess with item numbers.
+
+### Justification for Removal
+
+The QML engine changed a lot since I first wrote this guide. While it is still a good idea to keep
+the bindings simple (ie Don't call any expensive functions in a binding), it'd be incorrect to
+suggest there would be certain optimizations. The advice about avoiding `var` properties still
+apply, and you should strive to use the most precise type possible.
+
+### Previous Content
+
+~You are probably already familiar with the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
 QML supports optimization of binding expressions. Optimized bindings do not require
 a JavaScript environment hence it runs faster. The basic requirement for optimization
 of bindings is that the type  information of every symbol accessed must be known at
-compile time.
+compile time.~
 
-So, avoid accessing `var` properties. You can see the full list of prerequisites
-of optimized bindings [here](https://doc.qt.io/qt-5/qtquick-performance.html#bindings).
+~So, avoid accessing `var` properties. You can see the full list of prerequisites
+of optimized bindings [here](https://doc.qt.io/qt-5/qtquick-performance.html#bindings).~
 
 ## B-5: Be Lazy
 
-There may be cases where you don't need the binding immediately but when a certain
+Removed. No longer applies. Keeping the record to not mess with item numbers.
+
+### Justification for Removal
+
+Declarative is better than imperative in QML. This promotes an imperative approach, and doesn't
+provide a great value. If you are in need of disabling or enabling bindings, prefer
+[Binding](#b-1-prefer-bindings-over-imperative-assignments) objects instead. Or use a boolean flag
+to enable a binding, e.g `visible: privates.bindingEnabled ? root.count > 0 : false`.
+
+### Previous Content
+
+~There may be cases where you don't need the binding immediately but when a certain
 condition is met. By lazily creating a binding, you can avoid unnecessary executions.
-To create a binding during runtime, you can use `Qt.binding()`.
+To create a binding during runtime, you can use `Qt.binding()`.~
 
 ```qml
 Item {
@@ -780,7 +696,7 @@ Item {
 }
 ```
 
-You can also use `Qt.callLater` to reduce the redundant calls to a function.
+~You can also use `Qt.callLater` to reduce the redundant calls to a function.~
 
 ## B-6: Avoid Unnecessary Re-Evaluations
 
@@ -845,6 +761,10 @@ Item {
     }
 }
 ```
+
+Also note that `list` type doesn't have a change signal associated with adding/moving/removing
+elements from it. If you are using a `list` type to store sequential data, make sure that the
+places where this property is used does not do expensive things (e.g populating a view).
 
 # C++ Integration
 
