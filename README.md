@@ -223,7 +223,12 @@ Although there are no private and public functions in QML, you can provide a
 similar mechanism by wrapping the properties and functions that are only supposed
 to be used internally in `QtObject `.
 
-Public function implementations are always put at the very bottom of the file.
+Public function implementations are always put at the very bottom of the file. Even though we
+prioritize putting the public declarations at the top of the file for other types, I encourage you
+to put the public functions at the bottom because if the number of lines get larger for a function,
+it significantly reduces the readability of the QML document. Ideally, you shouldn't have any
+functions at all and strive to rely on declarative properties of your component as much as
+possible.
 
 ```qml
 // Wrong
