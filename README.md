@@ -576,6 +576,11 @@ set to something else. If you are setting the target after dynamically creating
 a QML object, you might want to set the `target` to `null` otherwise you might
 get signals that are not meant to be handled.
 
+Also note that using a `Connections` object will incur a slight performance/memory penalty since
+it's another allocation that has to be done. If you are concerned about this you can use
+`QtObject.connect` method, but [be careful](#sh-1-try-to-avoid-using-connect-function-in-models) of
+the pitfalls of this solution.
+
 ```qml
 // Bad
 Item {
