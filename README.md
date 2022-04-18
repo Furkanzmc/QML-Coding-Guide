@@ -19,7 +19,7 @@ contribution matters.
 
 - [Code Style](#code-style)
     - [CS-1: Signal Handler Ordering](#cs-1-signal-handler-ordering)
-    - [CS-2: Property Ordering](#cs-2-property-ordering)
+    - [CS-2: Property Initialization Order](#cs-2-property-initialization-order)
     - [CS-3: Function Ordering](#cs-3-function-ordering)
     - [CS-4: Animations](#cs-4-animations)
     - [CS-5: Giving Components `id`s](#cs-5-giving-components-ids)
@@ -65,7 +65,7 @@ are always structured in the following order:
 - id
 - Property declarations
 - Signal declarations
-- Object properties
+- Property initializations
 - Attached properties and signal handlers
 - States
 - Transitions
@@ -146,7 +146,7 @@ Item {
 }
 ```
 
-## CS-2: Property Ordering
+## CS-2: Property Initialization Order
 
 The first property assignment must always be the `id` of the component. If you
 want to declare custom properties for a component, the declarations are always
