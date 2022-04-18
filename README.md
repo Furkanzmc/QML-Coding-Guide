@@ -381,6 +381,9 @@ component SomeSpecialComponent: Rectangle {
 
 ### CS-7: Import Statements
 
+As a general rule, you should always prefer C++ over JavaScript to do heavy lifting. If there are
+cases where you justify having a separate JavaScript file, keep these in mind.
+
 If you are importing a JavaScript file, make sure to not include the same
 module in both the QML file and the JavaScript file. JavaScript files share the
 imports from the QML file so you can take advantage of that. If the JavaScript
@@ -391,8 +394,8 @@ the import statement to the JavaScript file. But note that once you import somet
 in the JavaScript file, the imports will no longer be shared. For the complete
 rules see [here](https://doc.qt.io/qt-5/qtqml-javascript-imports.html#imports-within-javascript-resources).
 
-Alternatively, you can use `Qt.include()` which copies the contents of the
-included file and you will not have to worry about the import sharing rules.
+`Qt.include()` is [deprecated](https://doc.qt.io/qt-6/qml-qtqml-qt-obsolete.html#include-method)
+and should not be used.
 
 As a general rule, you should avoid having unused import statements.
 
